@@ -1,0 +1,66 @@
+﻿@model ESportskiCentar.Models.Teren
+
+@{
+    ViewData["Title"] = "Obriši";
+}
+
+<section class="hero">
+    <div class="hero-content">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-6">
+                <h1>
+                    Obriši teren
+                </h1>
+
+                <p>
+                    Potvrdite brisanje terena.
+                </p>
+            </div>
+
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<div class="page-card">
+
+    <h1>Da li ste sigurni?</h1>
+
+    <p>
+        <strong>Naziv:</strong>
+        @Model.naziv
+    </p>
+
+    <p>
+        <strong>Sport:</strong>
+        @Model.sport
+    </p>
+
+    <form asp-action="Delete">
+
+        <input type="hidden" asp-for="id" />
+
+        <div class="text-center mt-4">
+
+            <button type="submit" class="btn btn-danger-custom">
+                Obriši
+            </button>
+
+            <a asp-action="Index"
+                   class="btn btn-secondary-custom ms-2">
+                Odustani
+            </a>
+
+        </div>
+
+    </form>
+
+</div>

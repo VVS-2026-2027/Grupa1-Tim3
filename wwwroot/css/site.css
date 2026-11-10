@@ -1,0 +1,293 @@
+:root {
+    --blue: #07376f;
+    --green: #9bd51b;
+    --light-gray: #eeeeee;
+    --white: #ffffff;
+}
+
+html {
+    font-size: 14px;
+    min-height: 100%;
+    position: relative;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+body {
+    margin: 0;
+    margin-bottom: 60px;
+    background-color: var(--light-gray);
+    font-family: Arial, sans-serif;
+    color: var(--blue);
+}
+
+.navbar {
+    background: white !important;
+    min-height: 70px;
+}
+
+.navbar-brand {
+    font-weight: 800;
+    color: var(--blue) !important;
+}
+
+.nav-link {
+    color: var(--blue) !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 13px;
+}
+
+    .nav-link:hover {
+        color: var(--green) !important;
+    }
+
+.hero {
+    background: linear-gradient(110deg, var(--blue) 0%, var(--blue) 58%, var(--green) 58%, var(--green) 100%);
+    min-height: 330px;
+    color: white;
+    display: flex;
+    align-items: center;
+}
+
+.hero-content {
+    width: 80%;
+    margin: auto;
+}
+
+.hero h1 {
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1.2;
+}
+
+.hero p {
+    margin-top: 20px;
+    font-weight: 600;
+}
+
+.btn-main {
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    color: white !important;
+    border: none;
+    border-radius: 18px;
+    padding: 8px 22px;
+    font-weight: 800;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+    .btn-main:hover {
+        opacity: 0.9;
+    }
+
+.section-title {
+    text-align: center;
+    color: var(--green);
+    font-style: italic;
+    margin: 30px 0;
+    font-weight: 700;
+}
+
+.info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    min-height: 190px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+    .info-card h3 {
+        color: var(--blue);
+        font-size: 22px;
+        font-weight: 800;
+    }
+
+    .info-card p {
+        color: var(--green);
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+.form-panel {
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    border-radius: 0 0 18px 18px;
+    padding: 25px;
+    max-width: 760px;
+    margin: -40px auto 30px auto;
+    color: white;
+}
+
+    .form-panel label {
+        font-weight: 700;
+    }
+
+.form-control, .form-select {
+    border-radius: 8px !important; /* Zaobljene ivice za sve inpute */
+    border: 2px solid #ced4da !important;
+    min-height: 42px;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+    color: #495057;
+    font-family: inherit;
+    transition: all 0.3s ease-in-out;
+}
+
+    /* Globalni efekat kada korisnik klikne u bilo koje polje na sajtu */
+    .form-control:focus, .form-select:focus {
+        border-color: var(--green) !important; /* Koristi tvoju zelenu za ivicu */
+        box-shadow: 0 0 0 0.25rem rgba(155, 213, 27, 0.25) !important; /* Zeleni prozirni sjaj */
+        background-color: #ffffff;
+        outline: none;
+    }
+
+/* Prisiljavanje browsera na evropski 24h format za sve kalendare i satove */
+.evropski-sat, .evropski-datum, input[type="datetime-local"], input[type="date"] {
+    lang: bs-BA;
+}
+.page-card {
+    background: white;
+    border-radius: 16px;
+    padding: 35px;
+    max-width: 650px;
+    margin: 40px auto;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+    .page-card h1,
+    .page-card h2 {
+        color: var(--blue);
+        font-weight: 900;
+        text-align: center;
+    }
+
+.time-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 110px);
+    gap: 18px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.time-btn {
+    border: none;
+    border-radius: 14px;
+    padding: 12px;
+    font-weight: 800;
+    text-align: center;
+    color: var(--blue);
+}
+
+.time-free {
+    background: var(--green);
+}
+
+.time-busy {
+    background: var(--blue);
+    color: white;
+}
+
+.table-custom {
+    background: white;
+    width: 90%;
+    margin: 30px auto;
+    border-collapse: collapse !important; 
+}
+
+    .table-custom thead tr th {
+        background-color: var(--blue) !important;
+        color: white !important;
+        padding: 15px !important;
+    }
+
+    .table-custom td,
+    .table-custom th {
+        padding: 18px;
+        text-align: center;
+    }
+
+.footer {
+    background: white;
+    color: var(--green) !important;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem var(--green);
+}
+
+main {
+    padding-bottom: 120px;
+}
+
+.btn-danger-custom {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+    .btn-danger-custom:hover {
+        background: #bb2d3b;
+        color: white;
+    }
+
+.btn-secondary-custom {
+    background: #f1f3f5;
+    color: #222;
+    border: 1px solid #d0d7de;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: 0.3s;
+    text-decoration: none;
+}
+
+    .btn-secondary-custom:hover {
+        background: #e2e6ea;
+        color: #000;
+    }
+
+.btn-details {
+    background: transparent;
+    color: #2563eb;
+    border: 1px solid #2563eb;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+    .btn-details:hover {
+        background: #2563eb;
+        color: white;
+    }
+
+.btn-edit {
+    background: #198754;
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+    .btn-edit:hover {
+        background: #157347;
+        color: white;
+    }

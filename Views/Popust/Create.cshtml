@@ -1,0 +1,54 @@
+﻿@model ESportskiCentar.Models.Popust
+
+@{
+    ViewData["Title"] = "Novi popust";
+}
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1>Popusti</h1>
+                <p>
+                    Unesite ispravne vrijednosti za pravilo popusta.
+                </p>
+            </div>
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="page-card">
+    <h1>Popusti</h1>
+
+    <form asp-action="Create" method="post">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="potrebanBrojRezervacija" class="form-label">Broj rezervacija</label>
+            <input asp-for="potrebanBrojRezervacija" class="form-control" />
+            <span asp-validation-for="potrebanBrojRezervacija" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="procenat" class="form-label">Popust (%)</label>
+            <input asp-for="procenat" class="form-control" />
+            <span asp-validation-for="procenat" class="text-danger"></span>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-main">Potvrdi</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

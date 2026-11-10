@@ -1,0 +1,15 @@
+# Kompajlirani fajlovi
+bin/
+obj/
+
+# Visual Studio i VS Code podešavanja
+.vs/
+.vscode/
+
+# Paketi i zavisnosti
+packages/
+node_modules/
+
+# Korisnička podešavanja i fajlovi baze
+*.user
+*.db
