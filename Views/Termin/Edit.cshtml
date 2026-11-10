@@ -1,0 +1,74 @@
+﻿@model ESportskiCentar.Models.Termin
+
+@{
+    ViewData["Title"] = "Uredi termin";
+}
+
+<section class="hero">
+    <div class="hero-content">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-6">
+                <h1>
+                    Uredi termin
+                </h1>
+
+                <p>
+                    Izmijenite podatke o terminu.
+                </p>
+            </div>
+
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<div class="page-card">
+    <h1>Uredi termin</h1>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="id" />
+        <input type="hidden" asp-for="rezervisan" />
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="terenID" class="form-label">Teren</label>
+            <select asp-for="terenID" class="form-select" asp-items="ViewBag.terenID">
+                <option value="">-- Odaberi teren --</option>
+            </select>
+            <span asp-validation-for="terenID" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="datum" class="form-label">Datum i vrijeme</label>
+            <input asp-for="datum" type="text" class="form-control kalendar-vrijeme"
+                   value="@Model.datum.ToString("yyyy-MM-ddTHH:mm")" />
+            <span asp-validation-for="datum" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="cijena" class="form-label">Cijena</label>
+            <input asp-for="cijena" class="form-control" />
+            <span asp-validation-for="cijena" class="text-danger"></span>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-main">Sačuvaj</button>
+            <a asp-action="Index" class="btn btn-secondary-custom ms-2">Nazad</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

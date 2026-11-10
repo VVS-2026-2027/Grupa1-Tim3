@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html>
+<html lang="bs">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - E-Sportski Centar</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ESportskiCentar.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="icon" type="image/png" href="~/images/logo.png" />
+    
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light border-bottom">
+            <div class="container-fluid px-4">
+                <a class="navbar-brand d-flex align-items-center" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo.png" width="75" class="me-2" alt="Logo" />
+
+                    <div>
+                        E - SPORTSKI CENTAR
+                        <small class="d-block text-muted" style="font-size:10px; line-height: 1.2;">
+                            PAMETNA REZERVACIJA TERMINA
+                        </small>
+                    </div>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
+                    <ul class="navbar-nav align-items-center gap-2">
+
+                        @if (!User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="btn-main" asp-area="Identity" asp-page="/Account/Login">Prijava</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn-main" asp-area="Identity" asp-page="/Account/Register">Registracija</a>
+                            </li>
+                        }
+                        else if (User.IsInRole("Administrator") || User.IsInRole("Radnik"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Termin" asp-action="Index">Termini</a>
+                            </li>
+
+                            @if (User.IsInRole("Administrator"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                           asp-controller="Popust"
+                                           asp-action="Index">
+                                        Popusti
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                           asp-controller="Teren"
+                                           asp-action="Index">
+                                        Tereni
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link"
+                                           asp-controller="Korisnik"
+                                           asp-action="Index">
+                                        Korisnici
+                                    </a>
+                                </li>
+                            }
+
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Izvjestaj" asp-action="Index">Izvještaji</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                       asp-controller="Rezervacija"
+                                       asp-action="Index">
+                                    Rezervacije
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <form asp-area="Identity"
+                                      asp-page="/Account/Logout"
+                                      asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })"
+                                      method="post">
+
+                                    <button type="submit" class="btn btn-link nav-link">
+                                        Odjava
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Termin" asp-action="Index">Rezerviši</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Rezervacija" asp-action="Index">Moje rezervacije</a>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-area="Identity"
+                                      asp-page="/Account/Logout"
+                                      asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })"
+                                      method="post">
+
+                                    <button type="submit" class="btn btn-link nav-link">
+                                        Odjava
+                                    </button>
+                                </form>
+                            </li>
+                        }
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <span style="font-size:28px;">👤</span>
+                            </li>
+                        }
+
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        © 2026 E-Sportski Centar | Sva prava zadržana
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/bs.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+        document.querySelectorAll(".kalendar-vrijeme").forEach(function (element) {
+    
+        var vrijednostIzBaze = element.getAttribute("value") || element.value;
+
+        flatpickr(element, {
+        locale: "bs",
+        enableTime: true,
+        time_24hr: true,
+        minuteIncrement: 5,
+        dateFormat: "Y-m-d H:i",
+        altInput: true,
+        altFormat: "d.m.Y. H:i",
+        allowInput: false,
+
+        defaultDate: vrijednostIzBaze ? vrijednostIzBaze : null,
+
+        onClose: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length > 0) {
+        instance.setDate(selectedDates[0], true);
+        }
+        }
+        });
+        });
+
+        document.querySelectorAll(".kalendar-datum").forEach(function (element) {
+        var vrijednostIzBaze = element.getAttribute("value") || element.value;
+
+        flatpickr(element, {
+        locale: "bs",
+        enableTime: false,
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d.m.Y.",
+        allowInput: false,
+        defaultDate: vrijednostIzBaze ? vrijednostIzBaze : null,
+
+        onClose: function(selectedDates, dateStr, instance) {
+        if (selectedDates.length > 0) {
+        instance.setDate(selectedDates[0], true);
+        }
+        }
+        });
+        });
+
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

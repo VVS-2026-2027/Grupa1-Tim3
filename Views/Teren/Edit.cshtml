@@ -1,0 +1,80 @@
+﻿@model ESportskiCentar.Models.Teren
+
+@{
+    ViewData["Title"] = "Uredi teren";
+}
+
+<section class="hero">
+    <div class="hero-content">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-6">
+                <h1>
+                    Uredi teren
+                </h1>
+
+                <p>
+                    Izmijenite informacije o terenu.
+                </p>
+            </div>
+
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<div class="page-card">
+
+    <h1>Uredi teren</h1>
+
+    <form asp-action="Edit">
+
+        <input type="hidden" asp-for="id" />
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="naziv" class="form-label"></label>
+            <input asp-for="naziv" class="form-control" />
+            <span asp-validation-for="naziv" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="sport" class="form-label"></label>
+
+            <select asp-for="sport"
+                    class="form-select"
+                    asp-items="Html.GetEnumSelectList<Sport>()">
+            </select>
+
+            <span asp-validation-for="sport" class="text-danger"></span>
+        </div>
+
+        <div class="text-center">
+
+            <button type="submit" class="btn btn-main">
+                Sačuvaj
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary-custom ms-2">
+                Nazad
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

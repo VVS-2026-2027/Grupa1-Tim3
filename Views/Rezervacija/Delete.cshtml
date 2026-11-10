@@ -1,0 +1,104 @@
+﻿@using ESportskiCentar.Helpers
+@model ESportskiCentar.Models.Rezervacija
+
+@{
+    ViewData["Title"] = "Otkaži rezervaciju";
+}
+
+<section class="hero">
+    <div class="hero-content">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-6">
+                <h1>Otkaži<br />rezervaciju</h1>
+
+                <p>
+                    Provjeri detalje termina prije otkazivanja.
+                </p>
+            </div>
+
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<div class="page-card">
+
+    <h1>Detalji rezervacije</h1>
+
+    <p>
+        <strong>Sport:</strong>
+        @Model.Termin?.Teren?.sport
+    </p>
+
+    <p>
+        <strong>Teren:</strong>
+        @Model.Termin?.Teren?.naziv
+    </p>
+
+    <p>
+        <strong>Vrijeme:</strong>
+        @Model.Termin?.datum.ToString("dd.MM.yyyy HH:mm")
+    </p>
+
+    <p>
+        <strong>Cijena termina:</strong>
+        @Model.Termin?.cijena KM
+    </p>
+
+    <p>
+        <strong>Popust:</strong>
+
+        @if (Model.primjenjenPopust && Model.Termin != null && Model.Termin.cijena > 0)
+        {
+            @(Math.Round(
+                ((Model.Termin.cijena - Model.konacnaCijena)
+                / Model.Termin.cijena) * 100, 0))
+            <text>%</text>
+        }
+        else
+        {
+            <text>0%</text>
+        }
+    </p>
+
+    <p>
+        <strong>Ukupna cijena:</strong>
+        @Model.konacnaCijena KM
+    </p>
+
+    <p class="text-success fw-bold">
+        Rezervaciju je moguće otkazati najkasnije 2 sata prije termina.
+    </p>
+
+    <form asp-action="Delete">
+
+        <input type="hidden" asp-for="id" />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="text-center">
+
+            @if (Model.Termin.datum > VrijemeHelper.SadaLokalno().AddHours(2) || User.IsInRole("Administrator") || User.IsInRole("Radnik"))
+            {
+                <button type="submit" class="btn btn-danger-custom">
+                    Otkaži
+                </button>
+            }
+            <a asp-controller="Rezervacija"
+                   asp-action="Index"
+                   class="btn btn-secondary-custom ms-2">
+                Nazad
+            </a>
+
+        </div>
+
+    </form>
+
+</div>

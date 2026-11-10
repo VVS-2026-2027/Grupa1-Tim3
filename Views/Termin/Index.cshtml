@@ -1,0 +1,161 @@
+﻿@model IEnumerable<ESportskiCentar.Models.Termin>
+
+@{
+    ViewData["Title"] = "Termini";
+}
+
+<section class="hero">
+    <div class="hero-content">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-6">
+                <h1>
+                    Termini
+                </h1>
+
+                <p>
+                    Pretražite dostupne termine po datumu i sportu.
+                </p>
+            </div>
+
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<div class="form-panel">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <form asp-action="Index" method="get">
+        <div class="row align-items-end">
+
+            <div class="col-md-3">
+                <label>Datum od</label>
+                <input type="text" class="form-control kalendar-datum"
+                       name="datumOd"
+                       value="@ViewBag.DatumOd"
+                        />
+            </div>
+
+            <div class="col-md-3">
+                <label>Datum do</label>
+                <input type="text"
+                       name="datumDo"
+                       value="@ViewBag.DatumDo"
+                        class="form-control kalendar-datum" />
+            </div>
+
+            <div class="col-md-3">
+                <label>Sport</label>
+                <select name="sport" class="form-select">
+                    <option value="">Svi sportovi</option>
+
+                    @foreach (var s in Enum.GetValues(typeof(ESportskiCentar.Models.Sport)))
+                    {
+                        if (ViewBag.Sport != null && ViewBag.Sport.ToString() == s.ToString())
+                        {
+                            <option value="@s" selected>@s</option>
+                        }
+                        else
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-main w-100">
+                    Pretraži
+                </button>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+@if (User.IsInRole("Administrator") || User.IsInRole("Radnik"))
+{
+    <div class="text-center mt-4">
+        <a asp-action="Create" class="btn btn-main">Dodaj termin</a>
+    </div>
+}
+
+@if (!Model.Any())
+{
+    <div class="page-card text-center">
+        <h1>Nema termina</h1>
+        <p>Nema dostupnih termina za odabrane filtere.</p>
+    </div>
+}
+else
+{
+    <table class="table table-custom">
+        <thead>
+            <tr>
+                <th>Teren</th>
+                <th>Sport</th>
+                <th>Datum i vrijeme</th>
+                <th>Cijena</th>
+                <th>Status</th>
+                <th>Akcije</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Teren?.naziv</td>
+                    <td>@item.Teren?.sport</td>
+                    <td>@item.datum.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@item.cijena KM</td>
+
+                    <td>
+                        @if (item.rezervisan)
+                        {
+                            <span class="badge bg-danger">Zauzet</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Slobodan</span>
+                        }
+                    </td>
+
+                    <td>
+                        <a asp-action="Details" class="btn btn-details btn-sm" asp-route-id="@item.id">Detalji</a>
+
+                        @if (!item.rezervisan && User.Identity.IsAuthenticated && !User.IsInRole("Administrator") && !User.IsInRole("Radnik"))
+                        {
+                            <span> | </span>
+                            <a asp-controller="Rezervacija"
+                                   asp-action="Create"
+                                   asp-route-terminId="@item.id"
+                                   class="btn btn-main">
+                                Rezerviši
+                            </a>
+                        }
+
+                        @if ((User.IsInRole("Administrator") || User.IsInRole("Radnik")) && !item.rezervisan)
+                        {
+                            <span> | </span>
+                            <a asp-action="Edit" class="btn btn-edit btn-sm" asp-route-id="@item.id">Uredi</a>
+                        }
+
+                        @if (User.IsInRole("Administrator") || User.IsInRole("Radnik"))
+                        {
+                            <span> | </span>
+                            <a asp-action="Delete" class="btn btn-danger-custom btn-sm" asp-route-id="@item.id">Obriši</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
