@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
-
+using Moq;
 namespace ESportskiCentar.Tests
 {
     [TestClass]
@@ -20,6 +20,7 @@ namespace ESportskiCentar.Tests
             Assert.IsInstanceOfType(rez, typeof(ViewResult));
 
         }
+
         [TestMethod]
         public void Error_BezAktivnosti()
         {
@@ -27,16 +28,18 @@ namespace ESportskiCentar.Tests
 
             try
             {
-                Activity.Current = null;//nikakve aktivnosti
+                Activity.Current = null;
+
+                var mock = new Mock<HttpContext>();//pravim lazni httpcontext 
+
+                mock.Setup(x => x.TraceIdentifier)
+                    .Returns("TEST-123");//uvijek da vraca test-123 
 
                 var kontroler = new HomeController();
 
                 kontroler.ControllerContext = new ControllerContext
                 {
-                    HttpContext = new DefaultHttpContext
-                    {
-                        TraceIdentifier = "TEST123"
-                    }
+                    HttpContext = mock.Object//mock je biblioteka pa mora .object
                 };
 
                 var rezultat = kontroler.Error();
@@ -47,13 +50,16 @@ namespace ESportskiCentar.Tests
                 var model = view.Model as ErrorViewModel;
 
                 Assert.IsNotNull(model);
-                Assert.AreEqual("TEST123", model.RequestId);//ako nema id onda default je traceidentifier, i provjeri jel dobio taj req id 
+                Assert.AreEqual("TEST-123", model.RequestId);
+
+                mock.Verify(x => x.TraceIdentifier, Times.Once());//je li mock koristen
             }
             finally
             {
-                Activity.Current = prethodna;//na kraju uvijek vrati aktivnost
+                Activity.Current = prethodna;
             }
         }
+
 
         [TestMethod]
         public void Error_SaAktivnosti()
