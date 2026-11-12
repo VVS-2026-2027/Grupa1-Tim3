@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestPodaci>
+	<Test>
+		<DatumOd>2025-10-01</DatumOd>
+		<DatumDo>2025-10-05</DatumDo>
+	</Test>
+	<Test>
+		<DatumOd>2024-05-10</DatumOd>
+		<DatumDo>2024-05-20</DatumDo>
+	</Test>
+	<Test>
+		<DatumOd>2023-01-01</DatumOd>
+		<DatumDo>2023-01-15</DatumDo>
+	</Test>
+</TestPodaci>

@@ -124,7 +124,7 @@ namespace ESportskiCentar.Controllers
         }
 
         [Authorize(Roles = "Administrator,Radnik")]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)//get
         {
             if (id == null)
                 return NotFound();
@@ -175,7 +175,7 @@ namespace ESportskiCentar.Controllers
                 return View(termin);
             }
 
-            _context.Update(termin);
+            _context.Update(termin);//da azurira podacima koje smo poslal
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
