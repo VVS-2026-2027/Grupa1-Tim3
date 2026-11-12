@@ -1,0 +1,84 @@
+﻿@page
+@model RegisterModel
+
+@{
+    ViewData["Title"] = "Registracija";
+}
+
+<section class="hero">
+    <div class="hero-content">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-6">
+                <h1>
+                    Registracija
+                </h1>
+
+                <p>
+                    Kreirajte račun i rezervišite termine brzo i jednostavno.
+                </p>
+            </div>
+
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<div class="page-card">
+    <h1>Registracija</h1>
+
+    <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Input.Ime" class="form-label">Ime:</label>
+            <input asp-for="Input.Ime" class="form-control" autocomplete="given-name" />
+            <span asp-validation-for="Input.Ime" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Input.Prezime" class="form-label">Prezime:</label>
+            <input asp-for="Input.Prezime" class="form-control" autocomplete="family-name" />
+            <span asp-validation-for="Input.Prezime" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Input.Email" class="form-label">Email:</label>
+            <input asp-for="Input.Email" class="form-control" autocomplete="username" />
+            <span asp-validation-for="Input.Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Input.Password" class="form-label">Lozinka:</label>
+            <input asp-for="Input.Password" class="form-control" autocomplete="new-password" />
+            <span asp-validation-for="Input.Password" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Input.ConfirmPassword" class="form-label">Potvrdi lozinku:</label>
+            <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" />
+            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+        </div>
+
+        <div class="text-center">
+            <button id="registerSubmit" type="submit" class="btn btn-main">Registruj se</button>
+        </div>
+
+        <div class="text-center mt-3">
+            <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">
+                Već imate račun? Prijavite se
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

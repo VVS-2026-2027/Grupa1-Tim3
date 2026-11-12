@@ -1,0 +1,97 @@
+﻿@model ESportskiCentar.Models.Termin
+
+@{
+    ViewData["Title"] = "Detalji termina";
+}
+
+<section class="hero">
+    <div class="hero-content">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-6">
+                <h1>
+                    Detalji termina
+                </h1>
+
+                <p>
+                    Pregled informacija o odabranom terminu.
+                </p>
+            </div>
+
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<div class="page-card">
+    <h1>Termin</h1>
+
+    @if ((User.IsInRole("Administrator") || User.IsInRole("Radnik")) && Model.rezervisan)
+    {
+        <p>
+            <strong>Rezervisao korisnik:</strong>
+            @(ViewBag.EmailKorisnika ?? "Nije pronađen")
+        </p>
+    }
+    <p>
+        <strong>Teren:</strong>
+        @Model.Teren?.naziv
+    </p>
+
+    <p>
+        <strong>Sport:</strong>
+        @Model.Teren?.sport
+    </p>
+
+    <p>
+        <strong>Datum i vrijeme:</strong>
+        @Model.datum.ToString("dd.MM.yyyy HH:mm")
+    </p>
+
+    <p>
+        <strong>Cijena:</strong>
+        @Model.cijena KM
+    </p>
+
+    <p>
+        <strong>Status:</strong>
+        @if (Model.rezervisan)
+        {
+            <span class="badge bg-danger">Zauzet</span>
+        }
+        else
+        {
+            <span class="badge bg-success">Slobodan</span>
+        }
+    </p>
+
+    <div class="text-center mt-4">
+        @if ((User.IsInRole("Administrator") || User.IsInRole("Radnik")) && !Model.rezervisan)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.id" class="btn btn-main">
+                Uredi
+            </a>
+        }
+
+        @if (!Model.rezervisan && User.Identity.IsAuthenticated && User.IsInRole("Korisnik"))
+        {
+            <a asp-controller="Rezervacija"
+                   asp-action="Create"
+                   asp-route-terminId="@Model.id"
+                   class="btn btn-main">
+                Rezerviši
+            </a>
+        }
+
+        <a asp-action="Index" class="btn btn-secondary-custom ms-2">
+            Nazad
+        </a>
+    </div>
+</div>

@@ -1,0 +1,60 @@
+﻿@model ESportskiCentar.Models.Teren
+
+@{
+    ViewData["Title"] = "Detalji";
+}
+
+<section class="hero">
+    <div class="hero-content">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-6">
+                <h1>
+                    Detalji terena
+                </h1>
+
+                <p>
+                    Pregled informacija o odabranom terenu.
+                </p>
+            </div>
+
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<div class="page-card">
+
+    <h1>@Model.naziv</h1>
+
+    <p>
+        <strong>Sport:</strong>
+        @Model.sport
+    </p>
+
+    <div class="text-center mt-4">
+
+        @if (User.IsInRole("Administrator"))
+        {
+            <a asp-action="Edit"
+                   asp-route-id="@Model.id"
+                   class="btn btn-main">
+                Uredi
+            </a>
+        }
+
+        <a asp-action="Index"
+               class="btn btn-secondary-custom ms-2">
+            Nazad
+        </a>
+
+    </div>
+
+</div>

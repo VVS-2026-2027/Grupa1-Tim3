@@ -1,0 +1,104 @@
+﻿@{
+    ViewData["Title"] = "Početna";
+}
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-content">
+
+        <div class="row align-items-center">
+
+            <div class="col-md-6">
+                <h1>
+                    Rezervišite Vaš<br />
+                    Savršen Termin!
+                </h1>
+
+                <p>
+                    Pronađi slobodne termine za sport koji voliš i
+                    rezerviši ih u par klikova.
+                </p>
+                @if (!(User.IsInRole("Administrator") || User.IsInRole("Radnik")))
+                {
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a asp-controller="Termin"
+                        asp-action="Index"
+                        class="btn btn-main mt-3">
+                            Rezerviši odmah
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-area="Identity"
+                        asp-page="/Account/Register"
+                        class="btn btn-main mt-3">
+                            Rezerviši odmah
+                        </a>
+                    }
+
+                }
+            </div>
+
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- INFO -->
+<section class="container mt-5">
+
+    <h2 class="section-title">
+        Zašto koristiti naš sistem?
+    </h2>
+
+    <div class="row mt-4">
+
+        <div class="col-md-4 mb-4">
+            <div class="info-card">
+
+                <h3>Brza rezervacija</h3>
+
+                <p>
+                    Rezerviši svoj termin brzo i jednostavno.
+                    Sve što treba je par klikova.
+                </p>
+
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="info-card">
+
+                <h3>Potpuna kontrola i pregled</h3>
+
+                <p>
+                    U svakom trenutku možeš pratiti termine,
+                    rezervacije i raspored svog sportskog centra.
+                </p>
+
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="info-card">
+
+                <h3>Podsjetnici i pogodnosti</h3>
+
+                <p>
+                    Sistem automatski šalje podsjetnike
+                    i omogućava ostvarivanje popusta.
+                </p>
+
+            </div>
+        </div>
+
+    </div>
+
+</section>

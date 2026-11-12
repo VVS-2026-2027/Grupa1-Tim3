@@ -1,0 +1,45 @@
+﻿@model ESportskiCentar.Models.Izvjestaj
+
+@{
+    ViewData["Title"] = "Izvještaji";
+}
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1>Izvještaji</h1>
+                <p>
+                    Odaberite vremenski period za generisanje izvještaja.
+                </p>
+            </div>
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="form-panel">
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="row align-items-end">
+            <div class="col-md-5">
+                <label asp-for="datumOd">Od datuma:</label>
+                <input asp-for="datumOd" type="text" class="form-control kalendar-datum" />
+            </div>
+
+            <div class="col-md-5">
+                <label asp-for="datumDo">Do datuma:</label>
+                <input asp-for="datumDo" type="text" class="form-control kalendar-datum" />
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-main w-100">Generiši</button>
+            </div>
+        </div>
+    </form>
+</div>
