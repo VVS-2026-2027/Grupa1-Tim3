@@ -63,11 +63,11 @@ namespace ESportskiCentar.Tests
 
             using var context = new ApplicationDbContext(opcije);
 
-            var korisnik = context.Model.FindEntityType(typeof(Korisnik));
+            var korisnik = context.Model.FindEntityType(typeof(Korisnik));//pronadji opis klase korisnik
 
-            Assert.IsNotNull(korisnik);
+            Assert.IsNotNull(korisnik);//provjeri da je nasao
 
-            Assert.IsNotNull(korisnik.FindProperty("ime"));//je li registruje oba svojstva
+            Assert.IsNotNull(korisnik.FindProperty("ime"));//provjeri zna li za ime 
             Assert.IsNotNull(korisnik.FindProperty("prezime"));
         }
     }
