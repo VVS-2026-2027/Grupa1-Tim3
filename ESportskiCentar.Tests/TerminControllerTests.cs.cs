@@ -10,7 +10,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Xml.Linq;
+using System.Security.Claims;
 namespace ESportskiCentar.Tests
 {
 
@@ -84,6 +86,280 @@ namespace ESportskiCentar.Tests
         }
 
         [TestMethod]
+        public async Task Index_ObicniKorisnik_VidiSamoSlobodneBuduceTermine()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var context = new ApplicationDbContext(opcije);
+
+            var teren = new Teren
+            {
+                naziv = "Testni teren"
+            };
+
+            context.Tereni.Add(teren);
+            await context.SaveChangesAsync();
+
+            var slobodan = new Termin
+            {
+                datum = DateTime.Today.AddDays(7),
+                cijena = 50,
+                terenID = teren.id,
+                rezervisan = false
+            };
+
+            var rezervisan = new Termin
+            {
+                datum = DateTime.Today.AddDays(8),
+                cijena = 60,
+                terenID = teren.id,
+                rezervisan = true
+            };
+
+            var prosli = new Termin
+            {
+                datum = DateTime.Today.AddDays(-7),
+                cijena = 40,
+                terenID = teren.id,
+                rezervisan = false
+            };
+
+            context.Termini.AddRange(slobodan, rezervisan, prosli);//addrrange isto ko i add samo moze vise odjednom dodati
+            await context.SaveChangesAsync();
+
+            var kontroler = new TerminController(context);
+
+            kontroler.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()//nema ni admin ni radnik
+            };
+
+            var rezultat = await kontroler.Index(null, null, null);//nije postavio filtere za datum, sport,. .
+
+            Assert.IsInstanceOfType(rezultat, typeof(ViewResult));
+
+            var view = (ViewResult)rezultat;
+            var lista = view.Model as List<Termin>;//pretovrim u listu termina
+
+            Assert.IsNotNull(lista);
+            Assert.AreEqual(1, lista.Count);//provjera da je vratio samo slobodni
+            Assert.AreEqual(slobodan.id, lista[0].id);//da je tacno jedan slobodno
+        }
+
+        [TestMethod]
+        public async Task Index_FiltriranjePoDatumima()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var context = new ApplicationDbContext(opcije);
+
+            var teren = new Teren
+            {
+                naziv = "Testni teren"
+            };
+
+            context.Tereni.Add(teren);
+            await context.SaveChangesAsync();
+
+            var prvi = new Termin
+            {
+                datum = DateTime.Today.AddDays(7),
+                cijena = 40,
+                terenID = teren.id,
+                rezervisan = false
+            };
+
+            var drugi = new Termin
+            {
+                datum = DateTime.Today.AddDays(10),
+                cijena = 50,
+                terenID = teren.id,
+                rezervisan = false
+            };
+
+            var treci = new Termin
+            {
+                datum = DateTime.Today.AddDays(14),
+                cijena = 60,
+                terenID = teren.id,
+                rezervisan = false
+            };
+
+            context.Termini.AddRange(prvi, drugi, treci);
+            await context.SaveChangesAsync();
+
+            var kontroler = new TerminController(context);
+
+            kontroler.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
+
+            var datumOd = DateTime.Today.AddDays(9);
+            var datumDo = DateTime.Today.AddDays(12);
+
+            var rezultat = await kontroler.Index(datumOd, datumDo, null);
+
+            Assert.IsInstanceOfType(rezultat, typeof(ViewResult));
+
+            var view = (ViewResult)rezultat;//uzme rezultantnu str
+            var lista = view.Model as List<Termin>;//uzme pod koji se salju 
+
+            Assert.IsNotNull(lista);
+            Assert.AreEqual(1, lista.Count);//samo jedan mora vratiti
+            Assert.AreEqual(drugi.id, lista[0].id);//provjera da je drugi
+        }
+
+        [TestMethod]
+        public async Task Index_FiltriranjePoSportu()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var context = new ApplicationDbContext(opcije);
+
+            // Uzimamo dva razlicita sporta iz enuma Sport
+            var sportovi = Enum.GetValues<Sport>();
+            Assert.IsTrue(sportovi.Length >= 2);
+
+            var teren1 = new Teren
+            {
+                naziv = "Prvi teren",
+                sport = sportovi[0]
+            };
+
+            var teren2 = new Teren
+            {
+                naziv = "Drugi teren",
+                sport = sportovi[1]
+            };
+
+            context.Tereni.AddRange(teren1, teren2);
+            await context.SaveChangesAsync();
+
+            var termin1 = new Termin
+            {
+                datum = DateTime.Today.AddDays(7),
+                cijena = 50,
+                terenID = teren1.id,
+                rezervisan = false
+            };
+
+            var termin2 = new Termin
+            {
+                datum = DateTime.Today.AddDays(8),
+                cijena = 60,
+                terenID = teren2.id,
+                rezervisan = false
+            };
+
+            context.Termini.AddRange(termin1, termin2);
+            await context.SaveChangesAsync();
+
+            var kontroler = new TerminController(context);
+
+            kontroler.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            };
+
+            // Trazimo termine samo za prvi sport
+            var rezultat = await kontroler.Index(null, null, sportovi[0]);
+
+            Assert.IsInstanceOfType(rezultat, typeof(ViewResult));
+
+            var view = (ViewResult)rezultat;//uzme tu str
+            var lista = view.Model as List<Termin>;
+
+            Assert.IsNotNull(lista);
+            Assert.AreEqual(1, lista.Count);
+            Assert.AreEqual(termin1.id, lista[0].id);
+        }
+
+        [TestMethod]
+        public async Task Index_Administrator_VidiSveTermine()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var context = new ApplicationDbContext(opcije);
+
+            var teren = new Teren
+            {
+                naziv = "Testni teren"
+            };
+
+            context.Tereni.Add(teren);
+            await context.SaveChangesAsync();
+
+            var slobodan = new Termin
+            {
+                datum = DateTime.Today.AddDays(7),
+                cijena = 50,
+                terenID = teren.id,
+                rezervisan = false
+            };
+
+            var rezervisan = new Termin
+            {
+                datum = DateTime.Today.AddDays(8),
+                cijena = 60,
+                terenID = teren.id,
+                rezervisan = true
+            };
+
+            var prosli = new Termin
+            {
+                datum = DateTime.Today.AddDays(-7),
+                cijena = 40,
+                terenID = teren.id,
+                rezervisan = false
+            };
+
+            context.Termini.AddRange(slobodan, rezervisan, prosli);
+            await context.SaveChangesAsync();
+
+            // Simuliramo korisnika s ulogom Administrator
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Role, "Administrator")
+    };
+
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var korisnik = new ClaimsPrincipal(identity);
+
+            var kontroler = new TerminController(context);
+            kontroler.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = korisnik
+                }
+            };
+
+            var rezultat = await kontroler.Index(null, null, null);
+
+            Assert.IsInstanceOfType(rezultat, typeof(ViewResult));
+
+            var view = (ViewResult)rezultat;
+            var lista = view.Model as List<Termin>;
+
+            Assert.IsNotNull(lista);
+            Assert.AreEqual(3, lista.Count);
+
+            Assert.IsTrue(lista.Any(t => t.id == slobodan.id));
+            Assert.IsTrue(lista.Any(t => t.id == rezervisan.id));
+            Assert.IsTrue(lista.Any(t => t.id == prosli.id));//da vidi sve vrste 
+        }
+
+
+        [TestMethod]
         public void ProvjeriUcitavanjeCSV()
         {
             var podaci = PodaciDatumi().ToList();
@@ -99,6 +375,69 @@ namespace ESportskiCentar.Tests
 
             Assert.IsInstanceOfType(rezultat, typeof(NotFoundResult));
         }
+
+        [TestMethod]
+        public async Task Details_RezervacijaBezKorisnika()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var context = new ApplicationDbContext(opcije);
+
+            var teren = new Teren
+            {
+                naziv = "Testni teren"
+            };
+
+            context.Tereni.Add(teren);
+            await context.SaveChangesAsync();
+
+            var termin = new Termin
+            {
+                datum = DateTime.Today.AddDays(7),
+                cijena = 50,
+                terenID = teren.id,
+                rezervisan = true
+            };
+
+            context.Termini.Add(termin);
+            await context.SaveChangesAsync();
+
+            // Rezervacija postoji, ali korisnik s ovim id ne postoji
+            var rezervacija = new Rezervacija
+            {
+                terminID = termin.id,
+                korisnikID = "nepostojeci"
+            };
+
+            context.Rezervacije.Add(rezervacija);
+            await context.SaveChangesAsync();
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Role, "Radnik")
+    };
+
+            var radnik = new ClaimsPrincipal(
+                new ClaimsIdentity(claims, "TestAuth"));
+
+            var kontroler = new TerminController(context);
+
+            kontroler.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = radnik
+                }
+            };
+
+            var rezultat = await kontroler.Details(termin.id);
+
+            Assert.IsInstanceOfType(rezultat, typeof(ViewResult));
+            Assert.IsNull(kontroler.ViewBag.EmailKorisnika);//nema korisnika s tim id u bazi,al ima rez
+        }
+
 
         [TestMethod]
         public async Task Details_TerminNePostoji()
@@ -154,6 +493,128 @@ namespace ESportskiCentar.Tests
 
             Assert.IsNotNull(dohvaceniTermin);
             Assert.AreEqual(termin.id, dohvaceniTermin.id);
+        }
+        [TestMethod]
+        public async Task Details_Administrator_BezRezervacije()//kad admin gleda termin kji nije rez 
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var context = new ApplicationDbContext(opcije);
+
+            var teren = new Teren { naziv = "Testni teren" };
+            context.Tereni.Add(teren);
+            await context.SaveChangesAsync();
+
+            var termin = new Termin
+            {
+                datum = DateTime.Today.AddDays(7),
+                cijena = 50,
+                terenID = teren.id,
+                rezervisan = false
+            };
+
+            context.Termini.Add(termin);
+            await context.SaveChangesAsync();
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Role, "Administrator")
+    };
+
+            var korisnik = new ClaimsPrincipal(
+                new ClaimsIdentity(claims, "TestAuth"));
+
+            var kontroler = new TerminController(context);
+            kontroler.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = korisnik
+                }
+            };
+
+            var rezultat = await kontroler.Details(termin.id);
+
+            Assert.IsInstanceOfType(rezultat, typeof(ViewResult));
+            Assert.IsNull(kontroler.ViewBag.EmailKorisnika);//mora vratitit null jer nema korisnika za taj termin , viewbag da se posalju dodatni
+        }
+        [TestMethod]
+        public async Task Details_Radnik_VidiKoJeRezervisao()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var context = new ApplicationDbContext(opcije);
+
+            var teren = new Teren
+            {
+                naziv = "Testni teren"
+            };
+
+            context.Tereni.Add(teren);
+            await context.SaveChangesAsync();
+
+            var termin = new Termin
+            {
+                datum = DateTime.Today.AddDays(7),
+                cijena = 50,
+                terenID = teren.id,
+                rezervisan = true
+            };
+
+            context.Termini.Add(termin);
+            await context.SaveChangesAsync();
+
+            var korisnik = new Korisnik
+            {
+                ime = "Test",
+                prezime = "Korisnik",
+                UserName = "test@example.com",
+                Email = "test@example.com"
+            };
+
+            context.Users.Add(korisnik);
+            await context.SaveChangesAsync();
+
+            var rezervacija = new Rezervacija
+            {
+                terminID = termin.id,
+                korisnikID = korisnik.Id,
+                Termin = termin,
+                Korisnik = korisnik
+            };
+
+            context.Rezervacije.Add(rezervacija);
+            await context.SaveChangesAsync();
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Role, "Radnik")
+    };
+
+            var radnik = new ClaimsPrincipal(
+                new ClaimsIdentity(claims, "TestAuth"));
+
+            var kontroler = new TerminController(context);
+
+            kontroler.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = radnik
+                }
+            };
+
+            var rezultat = await kontroler.Details(termin.id);//detalji termina
+
+            Assert.IsInstanceOfType(rezultat, typeof(ViewResult));
+
+            Assert.AreEqual(
+                "test@example.com",
+                (string?)kontroler.ViewBag.EmailKorisnika);// mora biti mail korisnika 
         }
         [TestMethod]
         public void Create_Get_VracaView()
@@ -318,6 +779,66 @@ namespace ESportskiCentar.Tests
 
             Assert.IsNotNull(kontroler.ViewData["terenID"]);
         }
+
+        [TestMethod]
+        public async Task Edit_Post_RezervisanTermin()//edit post 
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var context = new ApplicationDbContext(opcije);
+
+            var teren = new Teren
+            {
+                naziv = "Testni teren"
+            };
+
+            context.Tereni.Add(teren);
+            await context.SaveChangesAsync();
+
+            var termin = new Termin
+            {
+                datum = DateTime.Today.AddDays(7),
+                cijena = 50,
+                terenID = teren.id,
+                rezervisan = true
+            };
+
+            context.Termini.Add(termin);
+            await context.SaveChangesAsync();
+            var izmijenjeni = new Termin
+            {
+                id = termin.id,
+                datum = termin.datum,
+                cijena = 100,
+                terenID = teren.id
+            };
+
+            var kontroler = new TerminController(context);
+
+            kontroler.TempData = new TempDataDictionary(
+                new DefaultHttpContext(),
+                new TestTempDataProvider());
+
+            var rezultat = await kontroler.Edit(termin.id, izmijenjeni);
+
+            Assert.IsInstanceOfType(rezultat, typeof(RedirectToActionResult));
+
+            var redirect = (RedirectToActionResult)rezultat;
+            Assert.AreEqual("Index", redirect.ActionName);
+
+            Assert.AreEqual(
+                "Ne možete uređivati termin koji je već rezervisan.",
+                kontroler.TempData["Greska"]);
+
+            var sacuvani = await context.Termini
+                .AsNoTracking()
+                .FirstAsync(t => t.id == termin.id);
+
+            Assert.AreEqual(50, sacuvani.cijena);
+        }
+
         [TestMethod]
         public async Task Edit_Get_RezervisanTermin()
         {
@@ -541,6 +1062,177 @@ namespace ESportskiCentar.Tests
 
             Assert.AreEqual(50, sacuvani.cijena);
         }
+
+        [TestMethod]
+        public async Task Delete_Get_TerminPostoji()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var context = new ApplicationDbContext(opcije);
+
+            var teren = new Teren
+            {
+                naziv = "Testni teren"
+            };
+
+            context.Tereni.Add(teren);
+            await context.SaveChangesAsync();
+
+            var termin = new Termin
+            {
+                datum = DateTime.Today.AddDays(7),
+                cijena = 50,
+                terenID = teren.id,
+                rezervisan = false
+            };
+
+            context.Termini.Add(termin);
+            await context.SaveChangesAsync();
+
+            var kontroler = new TerminController(context);
+
+            var rezultat = await kontroler.Delete(termin.id);
+
+            Assert.IsInstanceOfType(rezultat, typeof(ViewResult));//delete vraca view
+
+            var view = (ViewResult)rezultat;
+            var dohvaceniTermin = view.Model as Termin;//uzimam termin koji salje 
+
+            Assert.IsNotNull(dohvaceniTermin);
+            Assert.AreEqual(termin.id, dohvaceniTermin.id);
+
+            Assert.AreEqual(1, await context.Termini.CountAsync());//ne brise 
+        }//ovdje testiram delete GET , on ne brise nego pokazuje potvrdu
+
+        [TestMethod]
+        public async Task Delete_Get_NullId()
+        {
+            var kontroler = new TerminController(null!);
+
+            var rezultat = await kontroler.Delete(null);
+
+            Assert.IsInstanceOfType(rezultat, typeof(NotFoundResult));
+        }//ne treba baza je prvo ide ifGET
+        [TestMethod]
+        public async Task Delete_Get_TerminNePostoji()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var context = new ApplicationDbContext(opcije);
+
+            var kontroler = new TerminController(context);
+
+            var rezultat = await kontroler.Delete(999);
+
+            Assert.IsInstanceOfType(rezultat, typeof(NotFoundResult));
+        }//999 nema  GET
+        [TestMethod]
+        public async Task DeleteConfirmed_TerminNePostoji()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var context = new ApplicationDbContext(opcije);
+
+            var kontroler = new TerminController(context);
+
+            var rezultat = await kontroler.DeleteConfirmed(999);
+
+            Assert.IsInstanceOfType(rezultat, typeof(NotFoundResult));
+        }//ovo je za post 
+
+        [TestMethod]
+        public async Task DeleteConfirmed_RezervisanTermin()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var context = new ApplicationDbContext(opcije);
+
+            var teren = new Teren
+            {
+                naziv = "Testni teren"
+            };
+
+            context.Tereni.Add(teren);
+            await context.SaveChangesAsync();
+
+            var termin = new Termin
+            {
+                datum = DateTime.Today.AddDays(7),
+                cijena = 50,
+                terenID = teren.id,
+                rezervisan = true
+            };
+
+            context.Termini.Add(termin);
+            await context.SaveChangesAsync();
+
+            var kontroler = new TerminController(context);
+
+            var rezultat = await kontroler.DeleteConfirmed(termin.id);
+
+            Assert.IsInstanceOfType(rezultat, typeof(ViewResult));
+
+            var view = (ViewResult)rezultat;
+            Assert.AreEqual("Delete", view.ViewName);//vraca na prikazdelete 
+
+            Assert.IsFalse(kontroler.ModelState.IsValid);//netacni pod
+
+            var poruka = kontroler.ModelState[string.Empty]?
+                .Errors.FirstOrDefault()?.ErrorMessage;//uzmi poruku
+
+            Assert.AreEqual("Ne možete obrisati rezervisan termin.", poruka);
+
+            Assert.AreEqual(1, await context.Termini.CountAsync());//ne smije brisati rezervisan termin
+        }
+
+        [TestMethod]
+        public async Task DeleteConfirmed_UspjesnoBrisanje()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var context = new ApplicationDbContext(opcije);
+
+            var teren = new Teren
+            {
+                naziv = "Testni teren"
+            };
+
+            context.Tereni.Add(teren);
+            await context.SaveChangesAsync();
+
+            var termin = new Termin
+            {
+                datum = DateTime.Today.AddDays(7),
+                cijena = 50,
+                terenID = teren.id,
+                rezervisan = false
+            };
+
+            context.Termini.Add(termin);
+            await context.SaveChangesAsync();
+
+            var kontroler = new TerminController(context);
+
+            var rezultat = await kontroler.DeleteConfirmed(termin.id);//brise
+
+            Assert.IsInstanceOfType(rezultat, typeof(RedirectToActionResult));//da vraca na index
+
+            var redirect = (RedirectToActionResult)rezultat;//prevaram da vidim gdje preusmjeri 
+            Assert.AreEqual("Index", redirect.ActionName);
+
+            Assert.AreEqual(0, await context.Termini.CountAsync());//posto nije rezervisan treba ga obrisati
+        }
+
 
 
 

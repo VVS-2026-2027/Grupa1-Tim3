@@ -76,7 +76,7 @@ namespace ESportskiCentar.Controllers
                     .Include(r => r.Korisnik)
                     .FirstOrDefaultAsync(r => r.terminID == termin.id);
 
-                ViewBag.EmailKorisnika = rezervacija?.Korisnik?.Email;
+                ViewBag.EmailKorisnika = rezervacija?.Korisnik?.Email;//sva tri ispitati moras
             }
 
             return View(termin);
@@ -169,7 +169,7 @@ namespace ESportskiCentar.Controllers
             ModelState.Remove("rezervisan");
 
             
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid)//sadrzi podatke koje je korisnik poslao, a dole ovo kreira padajucu listu 
             {
                 ViewData["terenID"] = new SelectList(_context.Tereni, "id", "naziv", termin.terenID);
                 return View(termin);
@@ -181,7 +181,7 @@ namespace ESportskiCentar.Controllers
         }
 
         [Authorize(Roles = "Administrator,Radnik")]
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)//get
         {
             if (id == null)
                 return NotFound();
@@ -199,7 +199,7 @@ namespace ESportskiCentar.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrator,Radnik")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)//post ovo stvarno obirse
         {
             var termin = await _context.Termini.FindAsync(id);
 
