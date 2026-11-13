@@ -4,12 +4,8 @@ using ESportskiCentar.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using System.Diagnostics;
-using System.Globalization;
 using System.Security.Claims;
-using System.Xml.Linq;
+
 
 namespace ESportskiCentar.Tests
 {
@@ -457,5 +453,101 @@ namespace ESportskiCentar.Tests
             CollectionAssert.AreEqual(new[] { 2, 3, 1 }, idevi);
         }
 
+        //Delete(GET)
+        [TestMethod]
+        public async Task DeleteGet_IdJeNull_VracaNotFound()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var kontekst = new ApplicationDbContext(opcije);
+            var kontroler = NapraviKontroler(kontekst);
+
+            var rezultat = await kontroler.Delete(null);
+
+            Assert.IsInstanceOfType<NotFoundResult>(rezultat);
+        }
+
+        [TestMethod]
+        public async Task DeleteGet_IzvjestajNePostoji_VracaNotFound()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var kontekst = new ApplicationDbContext(opcije);
+            var kontroler = NapraviKontroler(kontekst);
+
+            var rezultat = await kontroler.Delete(99);
+
+            Assert.IsInstanceOfType<NotFoundResult>(rezultat);
+        }
+
+        [TestMethod]
+        public async Task DeleteGet_IzvjestajPostoji_VracaViewSaIzvjestajem()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var kontekst = new ApplicationDbContext(opcije);
+
+            kontekst.Users.Add(NapraviKorisnika());
+            await kontekst.SaveChangesAsync();
+
+            await DodajIzvjestaj(kontekst, 5, new DateTime(2026, 2, 1));
+
+            var kontroler = NapraviKontroler(kontekst);
+
+            var rezultat = await kontroler.Delete(5) as ViewResult;
+
+            Assert.IsNotNull(rezultat);
+            Assert.AreEqual(5, ((Izvjestaj)rezultat.Model).id);
+        }
+
+        //DeleteConfirmed
+        [TestMethod]
+        public async Task DeleteConfirmed_BriseIzvjestajIzBaze()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var kontekst = new ApplicationDbContext(opcije);
+
+            kontekst.Users.Add(NapraviKorisnika());
+            await kontekst.SaveChangesAsync();
+
+            await DodajIzvjestaj(kontekst, 5, new DateTime(2026, 2, 1));
+
+            var kontroler = NapraviKontroler(kontekst);
+
+            await kontroler.DeleteConfirmed(5);
+
+            Assert.AreEqual(0, await kontekst.Izvjestaji.CountAsync());
+        }
+
+        [TestMethod]
+        public async Task DeleteConfirmed_PreusmjeravaNaIndex()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var kontekst = new ApplicationDbContext(opcije);
+
+            kontekst.Users.Add(NapraviKorisnika());
+            await kontekst.SaveChangesAsync();
+
+            await DodajIzvjestaj(kontekst, 5, new DateTime(2026, 2, 1));
+
+            var kontroler = NapraviKontroler(kontekst);
+
+            var rezultat = await kontroler.DeleteConfirmed(5) as RedirectToActionResult;
+
+            Assert.IsNotNull(rezultat);
+            Assert.AreEqual("Index", rezultat.ActionName);
+        }
     }
 }

@@ -1,0 +1,21 @@
+pretraga;ocekivanoValidno;ocekivaniBrojRezultata
+amar;true;1
+AMAR;true;1
+mar;true;3
+Amar Hodžić;true;1
+ana marić;true;1
+hodžić;true;1
+Ćosić;true;1
+đorđe;true;1
+ić;true;4
+xyz;true;0
+Marko Petrović;true;1
+a;true;4
+ž;true;1
+Amar123;false;0
+Amar!;false;0
+123;false;0
+Amar-Hodžić;false;0
+<script>;false;0
+Amar_;false;0
+a.b;false;0
