@@ -124,6 +124,7 @@ namespace ESportskiCentar.Tests
         [TestMethod]
         public void Termin_CijenaSaDecimalama()
         {
+            System.Threading.Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
             var termin = new Termin
             {
                 cijena = 15.50
