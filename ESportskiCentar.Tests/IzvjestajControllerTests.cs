@@ -198,6 +198,8 @@ namespace ESportskiCentar.Tests
             Assert.AreEqual(0, await context.Izvjestaji.CountAsync());
         }
 
+        // Create
+
         [TestMethod]
         public async Task Create_SnimaOcekivaniBrojRezervacija()
         {
@@ -333,6 +335,126 @@ namespace ESportskiCentar.Tests
 
             Assert.AreEqual(0, snimljen.ukupnoRezervacija);
             Assert.AreEqual(0.0, snimljen.ukupnaZarada);
+        }
+
+        //Details
+
+        [TestMethod]
+        public async Task Details_IdJeNull_VracaNotFound()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var kontekst = new ApplicationDbContext(opcije);
+            var kontroler = NapraviKontroler(kontekst);
+
+            var rezultat = await kontroler.Details(null);
+
+            Assert.IsInstanceOfType<NotFoundResult>(rezultat);
+        }
+
+        [TestMethod]
+        public async Task Details_IzvjestajNePostoji_VracaNotFound()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var kontekst = new ApplicationDbContext(opcije);
+            var kontroler = NapraviKontroler(kontekst);
+
+            var rezultat = await kontroler.Details(99);
+
+            Assert.IsInstanceOfType<NotFoundResult>(rezultat);
+        }
+
+        [TestMethod]
+        public async Task Details_IzvjestajPostoji_VracaViewSaIzvjestajem()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var kontekst = new ApplicationDbContext(opcije);
+
+            kontekst.Users.Add(NapraviKorisnika());
+            await kontekst.SaveChangesAsync();
+
+            await DodajIzvjestaj(kontekst, 5, new DateTime(2026, 2, 1));
+
+            var kontroler = NapraviKontroler(kontekst);
+
+            var rezultat = await kontroler.Details(5) as ViewResult;
+
+            Assert.IsNotNull(rezultat);
+            Assert.AreEqual(5, ((Izvjestaj)rezultat.Model).id);
+        }
+
+        [TestMethod]
+        public async Task Details_IzvjestajPostoji_UcitavaKorisnikaKojiJeGenerisaoIzvjestaj()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var kontekst = new ApplicationDbContext(opcije);
+
+            kontekst.Users.Add(NapraviKorisnika());
+            await kontekst.SaveChangesAsync();
+
+            await DodajIzvjestaj(kontekst, 5, new DateTime(2026, 2, 1));
+
+            var kontroler = NapraviKontroler(kontekst);
+
+            var rezultat = await kontroler.Details(5) as ViewResult;
+
+            Assert.IsNotNull(rezultat);
+            Assert.AreEqual("Testić", ((Izvjestaj)rezultat.Model).Korisnik.prezime);
+        }
+
+        //Index
+        [TestMethod]
+        public async Task Index_BezIzvjestaja_VracaPrazanModel()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var kontekst = new ApplicationDbContext(opcije);
+            var kontroler = NapraviKontroler(kontekst);
+
+            var rezultat = await kontroler.Index() as ViewResult;
+
+            Assert.IsNotNull(rezultat);
+            Assert.AreEqual(0, ((List<Izvjestaj>)rezultat.Model).Count);
+        }
+
+        [TestMethod]
+        public async Task Index_ViseIzvjestaja_SortiraIhOdNajnovijegPremaNajstarijem()
+        {
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
+
+            using var kontekst = new ApplicationDbContext(opcije);
+
+            kontekst.Users.Add(NapraviKorisnika());
+            await kontekst.SaveChangesAsync();
+
+            await DodajIzvjestaj(kontekst, 1, new DateTime(2026, 1, 1));
+            await DodajIzvjestaj(kontekst, 2, new DateTime(2026, 3, 1));
+            await DodajIzvjestaj(kontekst, 3, new DateTime(2026, 2, 1));
+
+            var kontroler = NapraviKontroler(kontekst);
+
+            var rezultat = await kontroler.Index() as ViewResult;
+
+            var idevi = ((List<Izvjestaj>)rezultat.Model)
+                .Select(i => i.id)
+                .ToList();
+
+            CollectionAssert.AreEqual(new[] { 2, 3, 1 }, idevi);
         }
 
     }
