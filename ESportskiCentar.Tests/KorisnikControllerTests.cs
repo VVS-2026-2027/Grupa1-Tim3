@@ -169,5 +169,64 @@ namespace ESportskiCentar.Tests
 
             userManager.VerifyGet(m => m.Users, Times.Never);
         }
+
+        //Index-ostalo
+
+        [TestMethod]
+        [DataRow((string)null)]
+        [DataRow("")]
+        [DataRow("   ")]
+        public void Index_PretragaNullPrazanIliSamoRazmaci_VracaSveKorisnike(
+            string pretraga)
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+
+            PostaviKorisnike(userManager);
+
+            var rezultat = kontroler.Index(pretraga) as ViewResult;
+
+            Assert.AreEqual(5, ((List<Korisnik>)rezultat.Model).Count);
+        }
+
+        [TestMethod]
+        public void Index_ValidnaPretraga_ZadrzavaPretraguUViewData()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+
+            PostaviKorisnike(userManager);
+
+            var rezultat = kontroler.Index("amar") as ViewResult;
+
+            Assert.AreEqual("amar", rezultat.ViewData["Pretraga"]);
+        }
+
+        [TestMethod]
+        public void Index_NevalidnaPretraga_ZadrzavaPretraguUViewData()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+
+            var rezultat = kontroler.Index("Amar123") as ViewResult;
+
+            Assert.AreEqual("Amar123", rezultat.ViewData["Pretraga"]);
+        }
+
+        [TestMethod]
+        public void Index_PretragaPoImenu_VracaTacnoOdgovarajucegKorisnika()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+
+            PostaviKorisnike(userManager);
+
+            var rezultat = kontroler.Index("lejla") as ViewResult;
+
+            Assert.AreEqual(
+                "Kovač",
+                ((List<Korisnik>)rezultat.Model).Single().prezime);
+        }
+
     }
 }
