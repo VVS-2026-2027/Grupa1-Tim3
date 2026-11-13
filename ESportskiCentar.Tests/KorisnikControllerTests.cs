@@ -37,10 +37,11 @@ namespace ESportskiCentar.Tests
                 Mock.Of<ILogger<UserManager<Korisnik>>>());
         }
 
-        private Korisnik NapraviKorisnika(string ime, string prezime)
+        private Korisnik NapraviKorisnika(string id, string ime, string prezime)
         {
             return new Korisnik
             {
+                Id=id,
                 ime = ime,
                 prezime = prezime
             };
@@ -51,17 +52,36 @@ namespace ESportskiCentar.Tests
         {
             var korisnici = new List<Korisnik>
             {
-                NapraviKorisnika( "Amar", "Hodžić"),
-                NapraviKorisnika( "Lejla", "Kovač"),
-                NapraviKorisnika( "Ana", "Marić"),
-                NapraviKorisnika( "Marko", "Petrović"),
-                NapraviKorisnika( "Đorđe", "Ćosić")
+                 NapraviKorisnika("id-1", "Amar", "Hodžić"),
+                NapraviKorisnika("id-2", "Lejla", "Kovač"),
+                NapraviKorisnika("id-3", "Ana", "Marić"),
+                NapraviKorisnika("id-4", "Marko", "Petrović"),
+                NapraviKorisnika("id-5", "Đorđe", "Ćosić")
             };
 
             userManager.Setup(m => m.Users)
                 .Returns(korisnici.AsQueryable());
         }
 
+        private void PostaviKorisnikaZaPromjenuRole(
+    Mock<UserManager<Korisnik>> userManager,
+    Korisnik korisnik,
+    IList<string> postojeceRole)
+        {
+            userManager.Setup(m => m.FindByIdAsync(korisnik.Id))
+                .ReturnsAsync(korisnik);
+
+            userManager.Setup(m => m.GetRolesAsync(korisnik))
+                .ReturnsAsync(postojeceRole);
+
+            userManager.Setup(m => m.RemoveFromRolesAsync(
+                    korisnik, It.IsAny<IEnumerable<string>>()))
+                .ReturnsAsync(IdentityResult.Success);
+
+            userManager.Setup(m => m.AddToRoleAsync(
+                    korisnik, It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+        }
         // Čitanje podataka iz CSV datoteke
         public static IEnumerable<object[]> ValidnePretrage()
         {
@@ -226,6 +246,204 @@ namespace ESportskiCentar.Tests
             Assert.AreEqual(
                 "Kovač",
                 ((List<Korisnik>)rezultat.Model).Single().prezime);
+        }
+        //Details
+        [TestMethod]
+        public async Task Details_IdJeNull_VracaNotFound()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+
+            var rezultat = await kontroler.Details(null);
+
+            Assert.IsInstanceOfType<NotFoundResult>(rezultat);
+        }
+
+        [TestMethod]
+        public async Task Details_KorisnikNePostoji_VracaNotFound()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+
+            var rezultat = await kontroler.Details("nepostojeci");
+
+            Assert.IsInstanceOfType<NotFoundResult>(rezultat);
+        }
+
+        [TestMethod]
+        public async Task Details_KorisnikPostoji_VracaViewSaKorisnikom()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+            var amar = NapraviKorisnika("id-1", "Amar", "Hodžić");
+
+            userManager.Setup(m => m.FindByIdAsync("id-1"))
+                .ReturnsAsync(amar);
+
+            userManager.Setup(m => m.GetRolesAsync(amar))
+                .ReturnsAsync((IList<string>)new List<string> { "Radnik" });
+
+            var rezultat = await kontroler.Details("id-1") as ViewResult;
+
+            Assert.AreSame(amar, rezultat.Model);
+        }
+
+        //PromijeniRolu(GET)
+        [TestMethod]
+        public async Task PromijeniRoluGet_IdJeNull_VracaNotFound()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+
+            var rezultat = await kontroler.PromijeniRolu(null);
+
+            Assert.IsInstanceOfType<NotFoundResult>(rezultat);
+        }
+
+        [TestMethod]
+        public async Task PromijeniRoluGet_KorisnikNePostoji_VracaNotFound()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+
+            userManager.Setup(m => m.FindByIdAsync("nepostojeci"))
+                .ReturnsAsync((Korisnik)null);
+
+            var rezultat = await kontroler.PromijeniRolu("nepostojeci");
+
+            Assert.IsInstanceOfType<NotFoundResult>(rezultat);
+        }
+
+        [TestMethod]
+        public async Task PromijeniRoluGet_KorisnikImaRolu_TrenutnaRolaJePrvaRola()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+            var amar = NapraviKorisnika("id-1", "Amar", "Hodžić");
+
+            userManager.Setup(m => m.FindByIdAsync("id-1"))
+                .ReturnsAsync(amar);
+
+            userManager.Setup(m => m.GetRolesAsync(amar))
+                .ReturnsAsync((IList<string>)new List<string> { "Radnik" });
+
+            var rezultat = await kontroler.PromijeniRolu("id-1") as ViewResult;
+
+            Assert.AreEqual("Radnik", rezultat.ViewData["TrenutnaRola"]);
+        }
+
+        [TestMethod]
+        public async Task PromijeniRoluGet_KorisnikBezRole_TrenutnaRolaJeBezRole()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+            var amar = NapraviKorisnika("id-1", "Amar", "Hodžić");
+
+            userManager.Setup(m => m.FindByIdAsync("id-1"))
+                .ReturnsAsync(amar);
+
+            userManager.Setup(m => m.GetRolesAsync(amar))
+                .ReturnsAsync((IList<string>)new List<string>());
+
+            var rezultat = await kontroler.PromijeniRolu("id-1") as ViewResult;
+
+            Assert.AreEqual("Bez role", rezultat.ViewData["TrenutnaRola"]);
+        }
+
+        //PromijeniRolu (POST)
+
+        [TestMethod]
+        public async Task PromijeniRoluPost_IdJeNull_VracaNotFound()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+
+            var rezultat = await kontroler.PromijeniRolu(null, "Radnik");
+
+            Assert.IsInstanceOfType<NotFoundResult>(rezultat);
+        }
+
+        [TestMethod]
+        public async Task PromijeniRoluPost_NovaRolaNull_VracaNotFound()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+
+            var rezultat = await kontroler.PromijeniRolu("id-1", null);
+
+            Assert.IsInstanceOfType<NotFoundResult>(rezultat);
+        }
+
+        //mock 
+
+
+        [TestMethod]
+        [TestCategory("Mock")]
+        public async Task PromijeniRoluPost_KorisnikImaRolu_UklanjaStareRoleIDodajeNovu()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+            var amar = NapraviKorisnika("id-1", "Amar", "Hodžić");
+
+            PostaviKorisnikaZaPromjenuRole(
+                userManager,
+                amar,
+                new List<string> { "Korisnik" });
+
+            await kontroler.PromijeniRolu("id-1", "Radnik");
+
+            userManager.Verify(
+                m => m.RemoveFromRolesAsync(amar, It.IsAny<IEnumerable<string>>()),
+                Times.Once);
+
+            userManager.Verify(
+                m => m.AddToRoleAsync(amar, "Radnik"),
+                Times.Once);
+        }
+
+        [TestMethod]
+        [TestCategory("Mock")]
+        public async Task PromijeniRoluPost_KorisnikBezRole_NeUklanjaRoleAliDodajeNovu()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+            var amar = NapraviKorisnika("id-1", "Amar", "Hodžić");
+
+            PostaviKorisnikaZaPromjenuRole(
+                userManager,
+                amar,
+                new List<string>());
+
+            await kontroler.PromijeniRolu("id-1", "Administrator");
+
+            userManager.Verify(
+                m => m.RemoveFromRolesAsync(
+                    It.IsAny<Korisnik>(),
+                    It.IsAny<IEnumerable<string>>()),
+                Times.Never);
+
+            userManager.Verify(
+                m => m.AddToRoleAsync(amar, "Administrator"),
+                Times.Once);
+        }
+
+        [TestMethod]
+        public async Task PromijeniRoluPost_UserManagerBacaIzuzetak_IzuzetakSePropagira()
+        {
+            var userManager = NapraviUserManagerMock();
+            var kontroler = new KorisnikController(userManager.Object);
+            var amar = NapraviKorisnika("id-1", "Amar", "Hodžić");
+
+            PostaviKorisnikaZaPromjenuRole(
+                userManager,
+                amar,
+                new List<string>());
+
+            userManager.Setup(m => m.AddToRoleAsync(amar, "Radnik"))
+                .ThrowsAsync(new InvalidOperationException("Rola ne postoji."));
+
+            await Assert.ThrowsExactlyAsync<InvalidOperationException>(
+                () => kontroler.PromijeniRolu("id-1", "Radnik"));
         }
 
     }
