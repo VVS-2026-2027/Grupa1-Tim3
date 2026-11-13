@@ -1,0 +1,218 @@
+[
+  {
+    "opis": "Sva polja ispravna",
+    "ime": "Amar",
+    "prezime": "Hodžić",
+    "email": "amar@test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka1",
+    "ocekivaneGreske": []
+  },
+  {
+    "opis": "Imena sa dijakriticima su ispravna",
+    "ime": "Đorđe",
+    "prezime": "Šćepanović",
+    "email": "djordje@test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka1",
+    "ocekivaneGreske": []
+  },
+  {
+    "opis": "Ime od tacno 2 slova (donja granica)",
+    "ime": "Al",
+    "prezime": "Hodžić",
+    "email": "al@test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka1",
+    "ocekivaneGreske": []
+  },
+  {
+    "opis": "Ime od tacno 30 slova (gornja granica)",
+    "ime": "Abcdefghijklmnopqrstuvwxyzabcd",
+    "prezime": "Hodžić",
+    "email": "dugo@test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka1",
+    "ocekivaneGreske": []
+  },
+  {
+    "opis": "Lozinka od tacno 6 karaktera (donja granica)",
+    "ime": "Amar",
+    "prezime": "Hodžić",
+    "email": "amar@test.ba",
+    "password": "123456",
+    "confirmPassword": "123456",
+    "ocekivaneGreske": []
+  },
+  {
+    "opis": "Ime nije uneseno (null)",
+    "ime": null,
+    "prezime": "Hodžić",
+    "email": "amar@test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka1",
+    "ocekivaneGreske": [
+      "Ime je obavezno polje."
+    ]
+  },
+  {
+    "opis": "Prezime je prazan string",
+    "ime": "Amar",
+    "prezime": "",
+    "email": "amar@test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka1",
+    "ocekivaneGreske": [
+      "Prezime je obavezno polje."
+    ]
+  },
+  {
+    "opis": "Ime od 1 slova (ispod granice)",
+    "ime": "A",
+    "prezime": "Hodžić",
+    "email": "amar@test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka1",
+    "ocekivaneGreske": [
+      "Ime mora imati između 2 i 30 karaktera.",
+      "Ime može sadržavati samo slova (bez razmaka i crtica)."
+    ]
+  },
+  {
+    "opis": "Ime od 31 slova (iznad granice)",
+    "ime": "Abcdefghijklmnopqrstuvwxyzabcde",
+    "prezime": "Hodžić",
+    "email": "amar@test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka1",
+    "ocekivaneGreske": [
+      "Ime mora imati između 2 i 30 karaktera.",
+      "Ime može sadržavati samo slova (bez razmaka i crtica)."
+    ]
+  },
+  {
+    "opis": "Ime sadrzi cifru",
+    "ime": "Amar1",
+    "prezime": "Hodžić",
+    "email": "amar@test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka1",
+    "ocekivaneGreske": [
+      "Ime može sadržavati samo slova (bez razmaka i crtica)."
+    ]
+  },
+  {
+    "opis": "Prezime sadrzi razmak",
+    "ime": "Amar",
+    "prezime": "Hodžić Kovač",
+    "email": "amar@test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka1",
+    "ocekivaneGreske": [
+      "Prezime može sadržavati samo slova (bez razmaka i crtica)."
+    ]
+  },
+  {
+    "opis": "Prezime sadrzi crticu",
+    "ime": "Amar",
+    "prezime": "Hodžić-Kovač",
+    "email": "amar@test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka1",
+    "ocekivaneGreske": [
+      "Prezime može sadržavati samo slova (bez razmaka i crtica)."
+    ]
+  },
+  {
+    "opis": "Email nije unesen",
+    "ime": "Amar",
+    "prezime": "Hodžić",
+    "email": null,
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka1",
+    "ocekivaneGreske": [
+      "Email adresa je obavezna."
+    ]
+  },
+  {
+    "opis": "Email bez znaka @",
+    "ime": "Amar",
+    "prezime": "Hodžić",
+    "email": "amar.test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka1",
+    "ocekivaneGreske": [
+      "Unesite validnu email adresu."
+    ]
+  },
+  {
+    "opis": "Email pocinje znakom @",
+    "ime": "Amar",
+    "prezime": "Hodžić",
+    "email": "@test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka1",
+    "ocekivaneGreske": [
+      "Unesite validnu email adresu."
+    ]
+  },
+  {
+    "opis": "Lozinka nije unesena",
+    "ime": "Amar",
+    "prezime": "Hodžić",
+    "email": "amar@test.ba",
+    "password": null,
+    "confirmPassword": null,
+    "ocekivaneGreske": [
+      "Lozinka je obavezna."
+    ]
+  },
+  {
+    "opis": "Lozinka od 5 karaktera (ispod granice)",
+    "ime": "Amar",
+    "prezime": "Hodžić",
+    "email": "amar@test.ba",
+    "password": "12345",
+    "confirmPassword": "12345",
+    "ocekivaneGreske": [
+      "Lozinka mora imati najmanje 6 karaktera."
+    ]
+  },
+  {
+    "opis": "Potvrda lozinke se ne podudara",
+    "ime": "Amar",
+    "prezime": "Hodžić",
+    "email": "amar@test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": "Lozinka2",
+    "ocekivaneGreske": [
+      "Lozanke se ne podudaraju."
+    ]
+  },
+  {
+    "opis": "Potvrda lozinke nije unesena",
+    "ime": "Amar",
+    "prezime": "Hodžić",
+    "email": "amar@test.ba",
+    "password": "Lozinka1",
+    "confirmPassword": null,
+    "ocekivaneGreske": [
+      "Lozanke se ne podudaraju."
+    ]
+  },
+  {
+    "opis": "Vise gresaka istovremeno",
+    "ime": "A1",
+    "prezime": "",
+    "email": "bez-emaila",
+    "password": "123",
+    "confirmPassword": "456",
+    "ocekivaneGreske": [
+      "Ime može sadržavati samo slova (bez razmaka i crtica).",
+      "Prezime je obavezno polje.",
+      "Unesite validnu email adresu.",
+      "Lozinka mora imati najmanje 6 karaktera.",
+      "Lozanke se ne podudaraju."
+    ]
+  }
+]
