@@ -8,10 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="TestData\popusti.csv" />
     <None Remove="TestData\RegistracijaPodaci.json" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="TestData\popusti.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestData\RegistracijaPodaci.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
