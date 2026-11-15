@@ -1,0 +1,12 @@
+procenat,potrebanBrojRezervacija,ispravno
+-1,5,false
+0,5,true
+1,5,true
+50,5,true
+99,5,true
+100,5,true
+101,5,false
+10,-1,false
+10,0,true
+10,1,true
+10,100,true
