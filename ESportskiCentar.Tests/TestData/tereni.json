@@ -1,5 +1,9 @@
 [
   {
+    "naziv": null,
+    "ispravno": false
+  },
+  {
     "naziv": "",
     "ispravno": false
   },
@@ -22,5 +26,13 @@
   {
     "naziv": "Kosarkaski teren",
     "ispravno": true
+  },
+  {
+    "naziv": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "ispravno": true
+  },
+  {
+    "naziv": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    "ispravno": false
   }
 ]
