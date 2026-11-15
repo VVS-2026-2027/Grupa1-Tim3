@@ -1,0 +1,18 @@
+[
+  {
+    "naziv": "Fudbalski teren",
+    "ispravno": true
+  },
+  {
+    "naziv": "Kosarkaski teren",
+    "ispravno": true
+  },
+  {
+    "naziv": "",
+    "ispravno": false
+  },
+  {
+    "naziv": " ",
+    "ispravno": false
+  }
+]
