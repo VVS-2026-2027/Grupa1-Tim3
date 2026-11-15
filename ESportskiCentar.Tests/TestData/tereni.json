@@ -1,18 +1,26 @@
 [
   {
-    "naziv": "Fudbalski teren",
-    "ispravno": true
-  },
-  {
-    "naziv": "Kosarkaski teren",
-    "ispravno": true
-  },
-  {
     "naziv": "",
     "ispravno": false
   },
   {
     "naziv": " ",
     "ispravno": false
+  },
+  {
+    "naziv": "AB",
+    "ispravno": false
+  },
+  {
+    "naziv": "ABC",
+    "ispravno": true
+  },
+  {
+    "naziv": "Fudbalski teren",
+    "ispravno": true
+  },
+  {
+    "naziv": "Kosarkaski teren",
+    "ispravno": true
   }
 ]

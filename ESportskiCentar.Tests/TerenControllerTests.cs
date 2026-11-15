@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Razor.Language.Intermediate;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
+using System.Text.Json;
 
 namespace ESportskiCentar.Tests
 {
@@ -48,7 +50,6 @@ namespace ESportskiCentar.Tests
                 return base.SaveChangesAsync(cancellationToken);
             }
         }
-
         // index testovi
         [TestMethod]
         public async Task Index_PraznaBaza_VracaPraznuListu()
@@ -267,6 +268,29 @@ namespace ESportskiCentar.Tests
             Assert.AreEqual("Index", ((RedirectToActionResult)rezultat).ActionName);
             Assert.AreEqual(1, await kontekst.Tereni.CountAsync());
             Assert.AreEqual(teren.id, (await kontekst.Tereni.SingleAsync()).id);
+        }
+        // ucitavanje JSON podataka, provjerava se validnost naziva
+        public static IEnumerable<object[]> PodaciNaziviTerenJson()
+        {
+            var putanja = Path.Combine(AppContext.BaseDirectory, "TestData", "tereni.json");
+
+            using var dokument = JsonDocument.Parse(File.ReadAllText(putanja));
+
+            return dokument.RootElement.EnumerateArray()
+                .Select(element => new object[]
+                {
+                    element.GetProperty("naziv").GetString()!,
+                    element.GetProperty("ispravno").GetBoolean()
+                }).ToList();
+        }
+
+        [TestMethod]
+        [DynamicData(nameof(PodaciNaziviTerenJson), DynamicDataSourceType.Method)]
+        public void Teren_NaziviIzJson_ProvjeravaValidaciju(string naziv, bool ispravno)
+        {
+            var teren = new Teren{ naziv = naziv, sport = Sport.FUDBAL };
+            bool validan = Validator.TryValidateObject(teren, new ValidationContext(teren), null, true);
+            Assert.AreEqual(ispravno, validan);
         }
     }
 }
