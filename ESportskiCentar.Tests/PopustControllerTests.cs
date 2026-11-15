@@ -31,7 +31,9 @@ namespace ESportskiCentar.Tests
         private class TestTempDataProvider : ITempDataProvider
         {
             public IDictionary<string, object> LoadTempData(HttpContext context)
-                => new Dictionary<string, object>();
+            {
+                return new Dictionary<string, object>();
+            }
 
             public void SaveTempData(HttpContext context, IDictionary<string, object> values) { }
         }
@@ -49,8 +51,7 @@ namespace ESportskiCentar.Tests
         {
             public bool BaciIzuzetak { get; set; }
 
-            public KontekstSaIzuzetkom(DbContextOptions<ApplicationDbContext> opcije)
-                : base(opcije) { }
+            public KontekstSaIzuzetkom(DbContextOptions<ApplicationDbContext> opcije): base(opcije) { }
 
             public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
             {
@@ -83,8 +84,7 @@ namespace ESportskiCentar.Tests
         [TestMethod]
         // [DynamicData()] govori MSTestuu da podatke za test uzima iz metode PodaciPopusti()
         [DynamicData(nameof(PodaciPopusti), DynamicDataSourceType.Method)]
-        public void Popust_GranicneVrijednostiIzCsv_ProvjeravaValidaciju(
-    double procenat, int potrebanBrojRezervacija, bool ispravno)
+        public void Popust_GranicneVrijednostiIzCsv_ProvjeravaValidaciju(double procenat, int potrebanBrojRezervacija, bool ispravno)
         {
             var popust = new Popust
             {
@@ -92,15 +92,11 @@ namespace ESportskiCentar.Tests
                 potrebanBrojRezervacija = potrebanBrojRezervacija
             };
 
-            bool validan = Validator.TryValidateObject(
-                popust,
-                new ValidationContext(popust),
-                null,
-                true);
+            bool validan = Validator.TryValidateObject(popust, new ValidationContext(popust), null, true);
             // provjerava da li je popust validan: ValidationContext daje informacije o objektu,
             // null znaci da ne cuvamo poruke o greskama, a true da provjeravamo sve validacijske
             // atribute svojstava (npr. Range). Metoda vraca true ako je validan, inace false
-            Assert.AreEqual(ispravno, validan, $"Procenat: {procenat}, broj rezervacija: {potrebanBrojRezervacija}");
+            Assert.AreEqual(ispravno, validan);
         }
         // index testovi
         [TestMethod]
@@ -165,8 +161,7 @@ namespace ESportskiCentar.Tests
         [TestMethod]
         public void CreateGet_VracaView()
         {
-            var kontroler = new PopustController(null!);
-            Assert.IsInstanceOfType<ViewResult>(kontroler.Create());
+            Assert.IsInstanceOfType<ViewResult>(NapraviKontroler(null).Create());
         }
 
         // create post testovi
@@ -175,11 +170,7 @@ namespace ESportskiCentar.Tests
         {
             using var kontekst = NapraviKontekst();
             var kontroler = NapraviKontroler(kontekst);
-            var rezultat = await kontroler.Create(new Popust
-            {
-                potrebanBrojRezervacija = 5,
-                procenat = 10
-            });
+            var rezultat = await kontroler.Create(new Popust{ potrebanBrojRezervacija = 5, procenat = 10 });
             Assert.IsInstanceOfType<RedirectToActionResult>(rezultat);
             // ako je dobro vraca na Index
             Assert.AreEqual("Index", ((RedirectToActionResult)rezultat).ActionName);
@@ -207,7 +198,7 @@ namespace ESportskiCentar.Tests
         [TestMethod]
         public async Task EditGet_NullId_VracaNotFound()
         {
-            var kontroler = new PopustController(null);
+            var kontroler = NapraviKontroler(null);
             var rezultat = await kontroler.Edit(null);
             Assert.IsInstanceOfType<NotFoundResult>(rezultat);
         }
@@ -234,13 +225,8 @@ namespace ESportskiCentar.Tests
         [TestMethod]
         public async Task EditPost_RazlicitiId_VracaNotFound()
         {
-            var kontroler = new PopustController(null);
-            var rezultat = await kontroler.Edit(2, new Popust
-            {
-                id = 1,
-                potrebanBrojRezervacija = 5,
-                procenat = 10
-            });
+            var kontroler = NapraviKontroler(null);
+            var rezultat = await kontroler.Edit(2, new Popust{ id = 1, potrebanBrojRezervacija = 5, procenat = 10 });
             Assert.IsInstanceOfType<NotFoundResult>(rezultat);
         }
 
@@ -254,12 +240,7 @@ namespace ESportskiCentar.Tests
             // doslo bi do konflikta kada bi kontroler zvao Update nad novim objekotm koji ima isti ID kao i ovaj koji prati
             kontekst.ChangeTracker.Clear();
             var kontroler = NapraviKontroler(kontekst);
-            var rezultat = await kontroler.Edit(id, new Popust
-            {
-                id = id,
-                potrebanBrojRezervacija = 15,
-                procenat = 30
-            });
+            var rezultat = await kontroler.Edit(id, new Popust{ id = id, potrebanBrojRezervacija = 15, procenat = 30 });
             Assert.IsInstanceOfType<RedirectToActionResult>(rezultat);
             Assert.AreEqual("Index", ((RedirectToActionResult)rezultat).ActionName);
             var sacuvani = await kontekst.Popusti.SingleAsync(p => p.id == id);
@@ -293,24 +274,17 @@ namespace ESportskiCentar.Tests
         [TestMethod]
         public async Task EditPost_IzuzetakIPopustNePostoji_VracaNotFound()
         {
-            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
             using var kontekst = new KontekstSaIzuzetkom(opcije) { BaciIzuzetak = true };
             var kontroler = NapraviKontroler(kontekst);
-            var rezultat = await kontroler.Edit(999, new Popust
-            {
-                id = 999,
-                potrebanBrojRezervacija = 5,
-                procenat = 10
-            });
+            var rezultat = await kontroler.Edit(999, new Popust{ id = 999, potrebanBrojRezervacija = 5, procenat = 10 });
             Assert.IsInstanceOfType<NotFoundResult>(rezultat);
         }
 
         [TestMethod]
         public async Task EditPost_IzuzetakIPopustPostoji_PonovoBacaIzuzetak()
         {
-            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+            var opcije = new DbContextOptionsBuilder<ApplicationDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
             using var kontekst = new KontekstSaIzuzetkom(opcije);
             var popust = await DodajPopust(kontekst);
             int id = popust.id;
@@ -318,19 +292,14 @@ namespace ESportskiCentar.Tests
             kontekst.BaciIzuzetak = true;
             var kontroler = NapraviKontroler(kontekst);
             await Assert.ThrowsExactlyAsync<DbUpdateConcurrencyException>(async () =>
-                await kontroler.Edit(id, new Popust
-                {
-                    id = id,
-                    potrebanBrojRezervacija = 15,
-                    procenat = 30
-                }));
+                await kontroler.Edit(id, new Popust{ id = id, potrebanBrojRezervacija = 15, procenat = 30 }));
         }
 
         // delete get testovi
         [TestMethod]
         public async Task DeleteGet_NullId_VracaNotFound()
         {
-            var rezultat = await new PopustController(null!).Delete(null);
+            var rezultat = await NapraviKontroler(null).Delete(null);
             Assert.IsInstanceOfType<NotFoundResult>(rezultat);
         }
 
