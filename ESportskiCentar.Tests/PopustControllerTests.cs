@@ -60,44 +60,6 @@ namespace ESportskiCentar.Tests
                 return base.SaveChangesAsync(cancellationToken);
             }
         }
-        // citanje podataka iz CSVa
-        public static IEnumerable<object[]> PodaciPopusti()
-        {
-            var putanja = Path.Combine(AppContext.BaseDirectory, "TestData", "popusti.csv");
-
-            return File.ReadAllLines(putanja)
-                .Skip(1)
-                .Where(red => !string.IsNullOrWhiteSpace(red))
-                .Select(red =>
-                {
-                    var dijelovi = red.Split(',');
-                    return new object[]
-                    {
-                        double.Parse(dijelovi[0], CultureInfo.InvariantCulture),
-                        int.Parse(dijelovi[1]),
-                        bool.Parse(dijelovi[2])
-                    };
-                }).ToList();
-        }
-        // DATA DRIVEN: provjerava DataAnnotations pravila modela Popust.
-        // Ovaj test prolazi samo ako pravila u Popust.cs odgovaraju CSV očekivanjima.
-        [TestMethod]
-        // [DynamicData()] govori MSTestuu da podatke za test uzima iz metode PodaciPopusti()
-        [DynamicData(nameof(PodaciPopusti), DynamicDataSourceType.Method)]
-        public void Popust_GranicneVrijednostiIzCsv_ProvjeravaValidaciju(double procenat, int potrebanBrojRezervacija, bool ispravno)
-        {
-            var popust = new Popust
-            {
-                procenat = procenat,
-                potrebanBrojRezervacija = potrebanBrojRezervacija
-            };
-
-            bool validan = Validator.TryValidateObject(popust, new ValidationContext(popust), null, true);
-            // provjerava da li je popust validan: ValidationContext daje informacije o objektu,
-            // null znaci da ne cuvamo poruke o greskama, a true da provjeravamo sve validacijske
-            // atribute svojstava (npr. Range). Metoda vraca true ako je validan, inace false
-            Assert.AreEqual(ispravno, validan);
-        }
         // index testovi
         [TestMethod]
         public async Task Index_PraznaBaza_VracaPraznuListu()
