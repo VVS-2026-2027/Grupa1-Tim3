@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="CodeCoverage.runsettings" />
+  </Folder>
   <Project Path="ESportskiCentar.csproj" />
   <Project Path="ESportskiCentar.Tests/ESportskiCentar.Tests.csproj" Id="fe4260f2-8842-4379-8927-aabbb857df45" />
 </Solution>
