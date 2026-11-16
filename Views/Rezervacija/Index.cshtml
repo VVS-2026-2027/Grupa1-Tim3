@@ -1,0 +1,172 @@
+﻿@model IEnumerable<ESportskiCentar.Models.Rezervacija>
+
+@{
+    ViewData["Title"] = "Rezervacije";
+}
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1>Rezervacije</h1>
+                <p>
+                    Pregled i pretraga rezervacija.
+                </p>
+            </div>
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="form-panel">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <form asp-action="Index" method="get">
+        <div class="row align-items-end">
+
+            <div class="col-md-3">
+                <label>Datum od</label>
+                <input type="text" class="form-control kalendar-datum"
+                       name="datumOd"
+                       value="@ViewBag.DatumOd"
+                        />
+            </div>
+
+            <div class="col-md-3">
+                <label>Datum do</label>
+                <input type="text" class="form-control kalendar-datum"
+                       name="datumDo"
+                       value="@ViewBag.DatumDo"
+                       />
+            </div>
+
+            <div class="col-md-3">
+                <label>Sport</label>
+                <select name="sport" class="form-select">
+                    <option value="">Svi sportovi</option>
+
+                    @foreach (var s in Enum.GetValues(typeof(ESportskiCentar.Models.Sport)))
+                    {
+                        if (ViewBag.Sport != null && ViewBag.Sport.ToString() == s.ToString())
+                        {
+                            <option value="@s" selected>@s</option>
+                        }
+                        else
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label>Status</label>
+                <select name="status" class="form-select">
+                    <option value="">Svi statusi</option>
+
+                    @foreach (var st in Enum.GetValues(typeof(ESportskiCentar.Models.Status)))
+                    {
+                        if (ViewBag.Status != null && ViewBag.Status.ToString() == st.ToString())
+                        {
+                            <option value="@st" selected>@st</option>
+                        }
+                        else
+                        {
+                            <option value="@st">@st</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-12 text-center mt-3">
+                <button type="submit" class="btn btn-main">
+                    Pretraži
+                </button>
+
+                <a asp-action="Index" class="btn btn-secondary-custom ms-2">
+                    Resetuj
+                </a>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="page-card text-center">
+        <h1>Nema rezervacija</h1>
+        <p>Nema rezervacija za odabrane filtere.</p>
+    </div>
+}
+else
+{
+    <table class="table table-custom">
+        <thead>
+            <tr>
+                @if (User.IsInRole("Administrator") || User.IsInRole("Radnik"))
+                {
+                    <th>Korisnik</th>
+                }
+
+                <th>Teren</th>
+                <th>Sport</th>
+                <th>Termin</th>
+                <th>Status</th>
+                <th>Cijena termina</th>
+                <th>Popust</th>
+                <th>Ukupna cijena</th>
+                @if (User.IsInRole("Korisnik"))
+                {
+                    <th>Akcije</th>                
+                }else
+                {
+                    <th></th>
+                }
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    @if (User.IsInRole("Administrator") || User.IsInRole("Radnik"))
+                    {
+                        <td>@item.Korisnik?.Email</td>
+                    }
+
+                    <td>@item.Termin?.Teren?.naziv</td>
+                    <td>@item.Termin?.Teren?.sport</td>
+                    <td>@item.Termin?.datum.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@item.status</td>
+                    <td>@item.Termin?.cijena KM</td>
+
+                    <td>
+                        @if (item.primjenjenPopust && item.Termin != null && item.Termin.cijena > 0)
+                        {
+                            @(Math.Round(((item.Termin.cijena - item.konacnaCijena) / item.Termin.cijena) * 100, 0))
+                            <text>%</text>
+                        }
+                        else
+                        {
+                            <text>0%</text>
+                        }
+                    </td>
+
+                    <td>@item.konacnaCijena KM</td>
+                    <td>
+                        @if (!User.IsInRole("Administrator") && !User.IsInRole("Radnik") && item.status == Status.CEKANJE)
+                         {
+                            <a asp-action="Delete" asp-route-id="@item.id" class="btn btn-danger-custom btn-sm">
+                                Otkaži
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

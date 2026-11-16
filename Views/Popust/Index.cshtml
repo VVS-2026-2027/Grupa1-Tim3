@@ -1,0 +1,50 @@
+﻿@model IEnumerable<ESportskiCentar.Models.Popust>
+
+@{
+    ViewData["Title"] = "Popusti";
+}
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1>Popusti</h1>
+                <p>
+                    Definisanje pravila za automatsku dodjelu popusta.
+                </p>
+            </div>
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="text-center mt-4">
+    <a asp-action="Create" class="btn btn-main">Novi popust</a>
+</div>
+
+<table class="table table-custom">
+    <thead>
+        <tr>
+            <th>Broj rezervacija</th>
+            <th>Popust (%)</th>
+            <th>Akcije</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.potrebanBrojRezervacija</td>
+                <td>@item.procenat</td>
+                <td>
+                    <a asp-action="Edit" class="btn btn-edit btn-sm" asp-route-id="@item.id">Uredi</a> |
+                    <a asp-action="Delete" class="btn btn-danger-custom" asp-route-id="@item.id">Obriši</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

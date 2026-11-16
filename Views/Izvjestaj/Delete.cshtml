@@ -1,0 +1,71 @@
+﻿@model ESportskiCentar.Models.Izvjestaj
+
+@{
+    ViewData["Title"] = "Obriši izvještaj";
+}
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1>Obriši izvještaj</h1>
+                <p>
+                    Potvrdite brisanje generisanog izvještaja.
+                </p>
+            </div>
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="page-card">
+    <h1>Da li ste sigurni?</h1>
+
+    <p>
+        <strong>Korisnik:</strong>
+        @Model.Korisnik?.Email
+    </p>
+
+    <p>
+        <strong>Od datuma:</strong>
+        @Model.datumOd.ToString("dd.MM.yyyy")
+    </p>
+
+    <p>
+        <strong>Do datuma:</strong>
+        @Model.datumDo.ToString("dd.MM.yyyy")
+    </p>
+
+    <p>
+        <strong>Datum generisanja:</strong>
+        @Model.datumGenerisanja.ToString("dd.MM.yyyy HH:mm")
+    </p>
+
+    <p>
+        <strong>Ukupno rezervacija:</strong>
+        @Model.ukupnoRezervacija
+    </p>
+
+    <p>
+        <strong>Ukupna zarada:</strong>
+        @Model.ukupnaZarada KM
+    </p>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="id" />
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-danger-custom">
+                Obriši
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary-custom ms-2">
+                Odustani
+            </a>
+        </div>
+    </form>
+</div>

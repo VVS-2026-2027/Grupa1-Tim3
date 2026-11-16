@@ -1,0 +1,69 @@
+﻿@model ESportskiCentar.Models.Izvjestaj
+
+@{
+    ViewData["Title"] = "Uredi izvještaj";
+}
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1>Uredi izvještaj</h1>
+                <p>
+                    Promijenite vremenski period izvještaja.
+                </p>
+            </div>
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="page-card">
+    <h1>Uredi izvještaj</h1>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="id" />
+        <input type="hidden" asp-for="korisnikID" />
+        <input type="hidden" asp-for="datumGenerisanja" />
+        <input type="hidden" asp-for="ukupnoRezervacija" />
+        <input type="hidden" asp-for="ukupnaZarada" />
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="datumOd" class="form-label">Od datuma</label>
+            <input asp-for="datumOd" type="text" class="form-control kalendar-datum" />
+            <span asp-validation-for="datumOd" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="datumDo" class="form-label">Do datuma</label>
+            <input asp-for="datumDo" type="text" class="form-control kalendar-datum" />
+            <span asp-validation-for="datumDo" class="text-danger"></span>
+        </div>
+
+        <div class="alert alert-info">
+            Ako promijeniš period, u kontroleru treba ponovo izračunati broj rezervacija i zaradu.
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-main">
+                Sačuvaj
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary-custom ms-2">
+                Nazad
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

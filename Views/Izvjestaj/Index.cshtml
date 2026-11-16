@@ -1,0 +1,77 @@
+﻿@model IEnumerable<ESportskiCentar.Models.Izvjestaj>
+
+@{
+    ViewData["Title"] = "Izvještaji";
+}
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1>Izvještaji</h1>
+                <p>
+                    Pregled svih generisanih izvještaja.
+                </p>
+            </div>
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="text-center mt-4">
+    <a asp-action="Create" class="btn btn-main">
+        Novi izvještaj
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="page-card text-center">
+        <h1>Nema izvještaja</h1>
+        <p>Još uvijek nije generisan nijedan izvještaj.</p>
+    </div>
+}
+else
+{
+    <table class="table table-custom">
+        <thead>
+            <tr>
+                <th>Korisnik</th>
+                <th>Od datuma</th>
+                <th>Do datuma</th>
+                <th>Datum generisanja</th>
+                <th>Ukupno rezervacija</th>
+                <th>Ukupna zarada</th>
+                <th>Akcije</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Korisnik?.Email</td>
+                    <td>@item.datumOd.ToString("dd.MM.yyyy")</td>
+                    <td>@item.datumDo.ToString("dd.MM.yyyy")</td>
+                    <td>@item.datumGenerisanja.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>@item.ukupnoRezervacija</td>
+                    <td>@item.ukupnaZarada KM</td>
+                    <td>
+                        <div class="d-inline-flex gap-2">
+                            <a asp-action="Details" class="btn btn-details btn-sm" asp-route-id="@item.id">Detalji</a>
+
+                            @if (User.IsInRole("Administrator"))
+                            {
+                                <a asp-action="Delete" class="btn btn-danger-custom btn-sm" asp-route-id="@item.id">Obriši</a>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -1,0 +1,95 @@
+﻿@model ESportskiCentar.Models.Rezervacija
+
+@{
+    ViewData["Title"] = "Uredi rezervaciju";
+}
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1>Uredi rezervaciju</h1>
+
+                <p>
+                    Izmijenite status rezervacije.
+                </p>
+            </div>
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<div class="page-card">
+
+    <h1>Uredi rezervaciju</h1>
+
+    <form asp-action="Edit" method="post">
+
+        <input type="hidden" asp-for="id" />
+        <input type="hidden" asp-for="korisnikID" />
+        <input type="hidden" asp-for="terminID" />
+        <input type="hidden" asp-for="vrijemeRezervacije" />
+        <input type="hidden" asp-for="primjenjenPopust" />
+        <input type="hidden" asp-for="konacnaCijena" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Teren</label>
+
+            <input class="form-control"
+                   value="@Model.Termin?.Teren?.naziv"
+                   disabled />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Datum i vrijeme</label>
+
+            <input class="form-control"
+                   value="@Model.Termin?.datum.ToString("dd.MM.yyyy HH:mm")"
+                   disabled />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="status" class="form-label"></label>
+
+            <select asp-for="status"
+                    class="form-select"
+                    asp-items="Html.GetEnumSelectList<Status>()">
+            </select>
+
+            <span asp-validation-for="status"
+                  class="text-danger">
+            </span>
+        </div>
+
+        <div class="text-center">
+
+            <button type="submit"
+                    class="btn btn-main">
+                Sačuvaj
+            </button>
+
+            <a asp-action="Index"
+                   class="btn btn-secondary-custom ms-2">
+                Nazad
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

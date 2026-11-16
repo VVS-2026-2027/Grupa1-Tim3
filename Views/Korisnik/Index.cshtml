@@ -1,0 +1,98 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model IEnumerable<ESportskiCentar.Models.Korisnik>
+
+@inject UserManager<Korisnik> UserManager
+
+@{
+    ViewData["Title"] = "Korisnici";
+}
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1>Korisnici</h1>
+                <p>
+                    Pregled svih korisnika sistema.
+                </p>
+            </div>
+            <div class="col-md-6 text-center">
+                <div>
+                    <img src="~/images/logo.png" alt="ESportskiCentar Logo" width="300" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="form-panel">
+
+    <form asp-action="Index" method="get">
+        <div class="row align-items-end">
+
+            <div class="col-md-9">
+
+                <label>Pretraga korisnika</label>
+                @if (!string.IsNullOrWhiteSpace(ViewBag.Pretraga as string) && ViewData.ModelState["pretraga"]?.Errors.Any() == true)
+                {
+                    <span class="text-danger"><br />@ViewData.ModelState["pretraga"].Errors[0].ErrorMessage</span>
+                }
+                <input type="text"
+                       name="pretraga"
+                       value="@ViewBag.Pretraga"
+                       class="form-control @(!string.IsNullOrWhiteSpace(ViewBag.Pretraga as string) && ViewData.ModelState["pretraga"]?.Errors.Any() == true ? "is-invalid" : "")"
+                       placeholder="Unesite ime ili prezime..." />
+            </div>
+
+            <div class="col-md-3">
+
+                <button type="submit"
+                        class="btn btn-main w-150">
+                    Pretraži
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<table class="table table-custom">
+    <thead>
+        <tr>
+            <th>Ime</th>
+            <th>Prezime</th>
+            <th>Email</th>
+            <th>Rola</th>
+            <th>Akcije</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var korisnik in Model)
+        {
+            var role = (await UserManager.GetRolesAsync(korisnik)).FirstOrDefault();
+
+            <tr>
+
+                <td>@korisnik.ime</td>
+                <td>@korisnik.prezime</td>
+                <td>@korisnik.Email</td>
+                <td>@role</td>
+
+                <td>
+                    <a asp-action="PromijeniRolu"
+                           asp-route-id="@korisnik.Id"
+                           class="btn btn-sm btn-main">
+                        Promijeni rolu
+                    </a>
+                </td>
+
+            </tr>
+        }
+
+    </tbody>
+</table>
