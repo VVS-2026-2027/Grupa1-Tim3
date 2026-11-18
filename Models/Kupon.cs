@@ -7,7 +7,7 @@
 
         public double IzracunajCijenu(double cijena, string uneseniKod)
         {
-            if (uneseniKod == kod)
+            if (uneseniKod?.Trim() == kod)
             {
                 return cijena - (cijena * procenat / 100);
             }
