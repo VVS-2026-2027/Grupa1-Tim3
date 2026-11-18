@@ -55,6 +55,13 @@ namespace ESportskiCentar.Tests
 
             Assert.AreEqual(90.0, kupon.IzracunajCijenu(100, "sport10"));
         }
+        [TestMethod]
+        public void Kupon_NeispravanProcenat()
+        {
+            var kupon = new Kupon { kod = "SPORT10", procenat = 150 };
+
+            Assert.AreEqual(100.0, kupon.IzracunajCijenu(100, "SPORT10"));
+        }
 
     }
 }
