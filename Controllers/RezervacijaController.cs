@@ -107,7 +107,7 @@ namespace ESportskiCentar.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("terminID")] Rezervacija rezervacija)
+        public async Task<IActionResult> Create([Bind("terminID,uneseniKod")] Rezervacija rezervacija)
         {
             var korisnikId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -142,11 +142,25 @@ namespace ESportskiCentar.Controllers
                 cijena = cijena - (cijena * popust.procenat / 100);
                 imaPopust = true;
             }
+            var kupon = new Kupon
+            {
+                kod = "SPORT10",
+                procenat = 10
+            };
+
+            double cijenaPrijeKupona = cijena;
+
+            cijena = kupon.IzracunajCijenu(
+                cijena,
+                rezervacija.uneseniKod
+            );
+
+            bool imaKupon = cijena < cijenaPrijeKupona;
 
             rezervacija.korisnikID = korisnikId;
             rezervacija.status = Status.CEKANJE;
             rezervacija.vrijemeRezervacije = VrijemeHelper.SadaLokalno();
-            rezervacija.primjenjenPopust = imaPopust;
+            rezervacija.primjenjenPopust = imaPopust||imaKupon;
             rezervacija.konacnaCijena = cijena;
 
             termin.rezervisan = true;
@@ -169,9 +183,17 @@ namespace ESportskiCentar.Controllers
         <p><strong>Sport:</strong> {termin.Teren.sport}</p>
         <p><strong>Datum i vrijeme:</strong> {termin.datum:dd.MM.yyyy. HH:mm}</p>
         <p><strong>Cijena:</strong> {termin.cijena} KM</p>
-{(imaPopust// ternarni op
-        ? $"<p><strong>Popust:</strong> {popust.procenat}%</p><p><strong>Cijena sa popustom:</strong> {rezervacija.konacnaCijena} KM</p>"
-        : "")}
+{(imaPopust
+    ? $"<p><strong>Automatski popust:</strong> {popust!.procenat}%</p>"
+    : "")}
+
+{(imaKupon
+    ? $"<p><strong>Kupon:</strong> {kupon.kod} ({kupon.procenat}%)</p>"
+    : "")}
+
+{((imaPopust || imaKupon)
+    ? $"<p><strong>Cijena sa popustom:</strong> {rezervacija.konacnaCijena} KM</p>"
+    : "")}
         "
                     );
                     mailPoslanUspjesno = true;
