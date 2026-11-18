@@ -7,10 +7,13 @@
 
         public double IzracunajCijenu(double cijena, string uneseniKod)
         {
+            if (procenat < 0 || procenat > 100)
+                return cijena;
+
             if (string.Equals(uneseniKod?.Trim(), kod,
-    StringComparison.OrdinalIgnoreCase))
+                StringComparison.OrdinalIgnoreCase))
             {
-                return cijena - (cijena * procenat / 100);
+                return cijena - cijena * procenat / 100;
             }
 
             return cijena;
