@@ -59,5 +59,26 @@ app.MapControllerRoute(
 
 app.MapRazorPages()
    .WithStaticAssets();
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider
+        .GetRequiredService<RoleManager<IdentityRole>>();
 
+    string[] uloge = { "Korisnik", "Administrator" };
+
+    foreach (var uloga in uloge)
+    {
+        if (!await roleManager.RoleExistsAsync(uloga))
+        {
+            var rezultat = await roleManager.CreateAsync(
+                new IdentityRole(uloga));
+
+            if (!rezultat.Succeeded)
+            {
+                throw new Exception(
+                    string.Join(", ", rezultat.Errors.Select(e => e.Description)));
+            }
+        }
+    }
+}
 app.Run();
