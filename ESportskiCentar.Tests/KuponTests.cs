@@ -20,5 +20,34 @@ namespace ESportskiCentar.Tests
 
             Assert.AreEqual(90.0, novaCijena);
         }
+    
+    [TestMethod]
+        public void Kupon_PogresanKod_NemaPopusta()
+        {
+            var kupon = new Kupon
+            {
+                kod = "SPORT10",
+                procenat = 10
+            };
+
+            double novaCijena = kupon.IzracunajCijenu(100, "POGRESAN");
+
+            Assert.AreEqual(100.0, novaCijena);
+        }
+
+        [TestMethod]
+        public void Kupon_KodSaRazmacima_UmanjujeCijenu()
+        {
+            var kupon = new Kupon
+            {
+                kod = "SPORT10",
+                procenat = 10
+            };
+
+            double novaCijena = kupon.IzracunajCijenu(100, " SPORT10 ");
+
+            Assert.AreEqual(90.0, novaCijena);
+        }
+
     }
 }
