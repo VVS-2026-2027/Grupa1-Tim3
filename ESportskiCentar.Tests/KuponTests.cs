@@ -1,0 +1,24 @@
+﻿
+using ESportskiCentar.Models;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace ESportskiCentar.Tests
+{
+    [TestClass]
+    public class KuponTests
+    {
+        [TestMethod]
+        public void Kupon_IspravanKod_UmanjujeCijenu()
+        {
+            var kupon = new Kupon
+            {
+                kod = "SPORT10",
+                procenat = 10
+            };
+
+            double novaCijena = kupon.IzracunajCijenu(100, "SPORT10");
+
+            Assert.AreEqual(90.0, novaCijena);
+        }
+    }
+}
