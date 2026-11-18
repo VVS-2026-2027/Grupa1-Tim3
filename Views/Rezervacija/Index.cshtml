@@ -169,4 +169,33 @@ else
             }
         </tbody>
     </table>
+    @if (User.IsInRole("Korisnik") && ViewBag.Statistika != null)
+    {
+        var statistika = (ESportskiCentar.Services.StatistikaPotrosnjeServis.StatistikaPotrosnje)ViewBag.Statistika;
+
+        <div class="container mt-1 mb-1">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="page-card text-center">
+                        <h5>Broj rezervacija</h5>
+                        <h2>@statistika.BrojRezervacija</h2>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <div class="page-card text-center">
+                        <h5>Ukupna potrošnja</h5>
+                        <h2>@statistika.Ukupno.ToString("F2") KM</h2>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <div class="page-card text-center">
+                        <h5>Prosječna cijena rezervacije</h5>
+                        <h2>@statistika.Prosjek.ToString("F2") KM</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 }

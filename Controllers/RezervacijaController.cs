@@ -20,7 +20,6 @@ namespace ESportskiCentar.Controllers
             _context = context;
             _emailService = emailService;
         }
-
         public async Task<IActionResult> Index(DateTime? datumOd, DateTime? datumDo, Sport? sport, Status? status)
         {
             if (datumOd.HasValue && datumDo.HasValue && datumDo < datumOd)
@@ -79,9 +78,17 @@ namespace ESportskiCentar.Controllers
             ViewBag.Sport = sport;
             ViewBag.Status = status;
 
-            return View(await rezervacije
+            var listaRezervacija = await rezervacije
                 .OrderByDescending(r => r.vrijemeRezervacije)
-                .ToListAsync());
+                .ToListAsync();
+
+            if (User.IsInRole("Korisnik"))
+            {
+                var statistika = StatistikaPotrosnjeServis.Izracunaj(listaRezervacija, korisnikId!);
+                ViewBag.Statistika = statistika;
+            }
+
+            return View(listaRezervacija);
         }
 
         public async Task<IActionResult> Create(int? terminId)
