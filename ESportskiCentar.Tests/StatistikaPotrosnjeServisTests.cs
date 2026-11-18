@@ -31,5 +31,21 @@ namespace ESportskiCentar.Tests
             Assert.AreEqual(50, rezultat.Ukupno);
             Assert.AreEqual(50, rezultat.Prosjek);
         }
+        [TestMethod]
+        public void ViseRezervacija_RacunaZbirIProsjek()
+        {
+            var rezervacije = new List<Rezervacija>
+            {
+                new Rezervacija{ korisnikID = "korisnik1", konacnaCijena = 20 },
+                new Rezervacija{ korisnikID = "korisnik1", konacnaCijena = 30 },
+                new Rezervacija{ korisnikID = "korisnik1", konacnaCijena = 40 }
+            };
+
+            var rezultat = StatistikaPotrosnjeServis.Izracunaj(rezervacije, "korisnik1");
+
+            Assert.AreEqual(3, rezultat.BrojRezervacija);
+            Assert.AreEqual(90, rezultat.Ukupno);
+            Assert.AreEqual(30, rezultat.Prosjek);
+        }
     }
 }
