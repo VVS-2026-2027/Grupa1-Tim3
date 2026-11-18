@@ -23,7 +23,7 @@ namespace ESportskiCentar.Tests
         [TestMethod]
         public void JednaRezervacija_VracaTacnuPotrosnju()
         {
-            var rezervacije = new List<Rezervacija>{ new Rezervacija { korisnikID = "korisnik1", konacnaCijena = 50 } };
+            var rezervacije = new List<Rezervacija> { new Rezervacija { korisnikID = "korisnik1", konacnaCijena = 50 } };
 
             var rezultat = StatistikaPotrosnjeServis.Izracunaj(rezervacije, "korisnik1");
 
@@ -47,5 +47,21 @@ namespace ESportskiCentar.Tests
             Assert.AreEqual(90, rezultat.Ukupno);
             Assert.AreEqual(30, rezultat.Prosjek);
         }
+        [TestMethod]
+            public void RezervacijeDrugihKorisnika_NeRacunajuSe()
+            {
+                var rezervacije = new List<Rezervacija>
+                {
+                    new Rezervacija{ korisnikID = "korisnik1", konacnaCijena = 20 },
+                    new Rezervacija{ korisnikID = "korisnik2", konacnaCijena = 100 },
+                    new Rezervacija{ korisnikID = "korisnik1", konacnaCijena = 40 }
+                };
+
+                var rezultat = StatistikaPotrosnjeServis.Izracunaj(rezervacije, "korisnik1");
+
+                Assert.AreEqual(2, rezultat.BrojRezervacija);
+                Assert.AreEqual(60, rezultat.Ukupno);
+                Assert.AreEqual(30, rezultat.Prosjek);
+            }
     }
 }
