@@ -6,12 +6,17 @@ namespace ESportskiCentar.Services
     {
         public record StatistikaPotrosnje(int BrojRezervacija, double Ukupno, double Prosjek);
         public static StatistikaPotrosnje Izracunaj(IEnumerable<Rezervacija> rezervacije, string korisnikId)
-        {
-            var lista = rezervacije.ToList();
-            if (lista.Count == 0)
-                return new StatistikaPotrosnje(0, 0, 0);
-            return new StatistikaPotrosnje(1, lista[0].konacnaCijena, lista[0].konacnaCijena);
-        }
+            {
+                var lista = rezervacije.ToList();
+                int broj = lista.Count;
+                if (broj == 0)
+                    return new StatistikaPotrosnje(0, 0, 0);
+
+                double ukupno = lista.Sum(r => r.konacnaCijena);
+                double prosjek = ukupno / broj;
+
+                return new StatistikaPotrosnje(broj, ukupno, prosjek);
+            }
 
     }
 }
