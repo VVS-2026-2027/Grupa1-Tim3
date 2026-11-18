@@ -40,5 +40,9 @@ namespace ESportskiCentar.Models
 
         public Termin? Termin { get; set; }
         public Korisnik? Korisnik { get; set; }
+
+        [NotMapped]
+        [DisplayName("Kod kupona")]
+        public string? uneseniKod { get; set; }
     }
 }
