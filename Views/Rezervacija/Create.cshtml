@@ -51,6 +51,16 @@
 
     <form asp-action="Create" method="post">
         <input type="hidden" asp-for="terminID" />
+        <div class="mb-3">
+            <label asp-for="uneseniKod" class="form-label"></label>
+            <input asp-for="uneseniKod"
+                   class="form-control"
+                   placeholder="Unesite kod kupona" />
+        </div>
+
+        <p class="text-muted">
+            Dostupni kupon za testiranje: SPORT10 (10% popusta).
+        </p>
 
         <div class="text-center mt-4">
             <button type="submit" class="btn btn-main">
