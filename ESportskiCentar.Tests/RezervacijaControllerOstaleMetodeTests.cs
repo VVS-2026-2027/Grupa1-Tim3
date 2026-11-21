@@ -7,6 +7,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
+using Moq;
+using Moq.Protected;
+using System.Net;
 
 namespace ESportskiCentar.Tests
 {
@@ -527,5 +531,294 @@ namespace ESportskiCentar.Tests
             Assert.AreEqual(0,
                 await context.Rezervacije.CountAsync());
         }
+
+
+        // CREATE POST - nepostojeci termin
+
+        [TestMethod]
+        public async Task CreatePost_NepostojeciTermin_VracaNotFound()
+        {
+            using var context = NapraviKontekst();
+            var kontroler = NapraviKontroler(context);
+
+            var rezervacija = new Rezervacija
+            {
+                terminID = 999
+            };
+
+            var rezultat = await kontroler.Create(rezervacija);
+
+            Assert.IsInstanceOfType<NotFoundResult>(rezultat);
+            Assert.AreEqual(0, await context.Rezervacije.CountAsync());
+        }
+
+
+        // CREATE POST - zauzet termin
+
+        [TestMethod]
+        public async Task CreatePost_ZauzetTermin_VracaViewSaGreskom()
+        {
+            using var context = NapraviKontekst();
+
+            var postojeca = await DodajRezervaciju(context);
+            var kontroler = NapraviKontroler(context);
+
+            var rezervacija = new Rezervacija
+            {
+                terminID = postojeca.terminID
+            };
+
+            var rezultat = await kontroler.Create(rezervacija);
+
+            Assert.IsInstanceOfType<ViewResult>(rezultat);
+            Assert.IsFalse(kontroler.ModelState.IsValid);
+
+            Assert.AreEqual(1, await context.Rezervacije.CountAsync());
+        }
+
+
+        // CREATE POST - automatski popust
+
+        [TestMethod]
+        [DataRow(0, 80.0)]
+        [DataRow(5, 100.0)]
+        public async Task CreatePost_AutomatskiPopust_IspravnoRacunaCijenu(
+            int potrebanBroj, double ocekivanaCijena)
+        {
+            using var context = NapraviKontekst();
+
+            var postojeca = await DodajRezervaciju(context);
+
+            var termin = await context.Termini.FindAsync(
+                postojeca.terminID);
+
+            Assert.IsNotNull(termin);
+
+            context.Rezervacije.Remove(postojeca);
+            termin.rezervisan = false;
+
+            context.Popusti.Add(new Popust
+            {
+                potrebanBrojRezervacija = potrebanBroj,
+                procenat = 20
+            });
+
+            await context.SaveChangesAsync();
+
+            var kontroler = NapraviKontroler(context);
+
+            var rezervacija = new Rezervacija
+            {
+                terminID = termin.id
+            };
+
+            var rezultat = await kontroler.Create(rezervacija);
+
+            Assert.IsInstanceOfType<RedirectToActionResult>(rezultat);
+
+            var sacuvana = await context.Rezervacije.SingleAsync();
+
+            Assert.AreEqual(
+                ocekivanaCijena,
+                sacuvana.konacnaCijena,
+                0.001);
+
+            Assert.AreEqual(
+                ocekivanaCijena < 100,
+                sacuvana.primjenjenPopust);
+        }
+
+
+        // DELETE CONFIRMED - slanje emaila
+
+        [TestMethod]
+        [DataRow(202)]
+        [DataRow(400)]
+        public async Task DeleteConfirmed_SlanjeMaila_BriseRezervaciju(
+            int httpStatus)
+        {
+            using var context = NapraviKontekst();
+
+            var rezervacija = await DodajRezervaciju(context);
+
+            var korisnik = await context.Users.FindAsync(
+                rezervacija.korisnikID);
+
+            Assert.IsNotNull(korisnik);
+
+            korisnik.Email = "korisnik@primjer.ba";
+
+            await context.SaveChangesAsync();
+
+            var handler = new Mock<HttpMessageHandler>();
+
+            handler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(
+                    new HttpResponseMessage((HttpStatusCode)httpStatus));
+
+            using var client = new HttpClient(handler.Object);
+
+            var podaci = new Dictionary<string, string?>
+            {
+                ["Brevo:ApiKey"] = "test-key",
+                ["Brevo:FromEmail"] = "centar@primjer.ba",
+                ["Brevo:FromName"] = "Test centar"
+            };
+
+            var konfiguracija = new ConfigurationBuilder()
+                .AddInMemoryCollection(podaci)
+                .Build();
+
+            var servis = new EmailService(client, konfiguracija);
+
+            var kontroler = new RezervacijaController(context, servis);
+
+            var identitet = new ClaimsIdentity(
+                new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, korisnik.Id)
+                },
+                "Test");
+
+            kontroler.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(identitet)
+                }
+            };
+
+            var rezultat = await kontroler.DeleteConfirmed(
+                rezervacija.id);
+
+            Assert.IsInstanceOfType<RedirectToActionResult>(rezultat);
+
+            Assert.AreEqual(
+                0,
+                await context.Rezervacije.CountAsync());
+
+            var termin = await context.Termini.FindAsync(
+                rezervacija.terminID);
+
+            Assert.IsNotNull(termin);
+            Assert.IsFalse(termin.rezervisan);
+
+            handler.Protected().Verify(
+                "SendAsync",
+                Times.Once(),
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>());
+        }
+
+
+        [TestMethod]
+        [DataRow("", false)]
+        [DataRow("SPORT10", true)]
+        public async Task CreatePost_PopustIKupon_SaljeEmail(
+            string kod, bool imaKupon)
+        {
+            using var context = NapraviKontekst();
+
+            // Koristimo postojecu pomocnu metodu
+            var postojeca = await DodajRezervaciju(context);
+
+            var termin = await context.Termini.FindAsync(
+                postojeca.terminID);
+
+            Assert.IsNotNull(termin);
+
+            // Oslobadjamo termin za novu rezervaciju
+            context.Rezervacije.Remove(postojeca);
+            termin.rezervisan = false;
+
+            var korisnik = await context.Users.FindAsync(
+                postojeca.korisnikID);
+
+            Assert.IsNotNull(korisnik);
+
+            korisnik.Email = "test@primjer.ba";
+
+            // Automatski popust od 20%
+            context.Popusti.Add(new Popust
+            {
+                potrebanBrojRezervacija = 0,
+                procenat = 20
+            });
+
+            await context.SaveChangesAsync();
+
+            // Simuliramo uspjesno slanje emaila
+            var handler = new Mock<HttpMessageHandler>();
+
+            handler.Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>())
+                .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.Accepted));
+
+            using var client = new HttpClient(handler.Object);
+
+            var podaci = new Dictionary<string, string?>
+            {
+                ["Brevo:ApiKey"] = "test-key",
+                ["Brevo:FromEmail"] = "centar@primjer.ba",
+                ["Brevo:FromName"] = "Test centar"
+            };
+
+            var konfiguracija = new ConfigurationBuilder()
+                .AddInMemoryCollection(podaci)
+                .Build();
+
+            var servis = new EmailService(client, konfiguracija);
+
+            var kontroler = new RezervacijaController(context, servis);
+
+            var identitet = new ClaimsIdentity(
+                new[]
+                {
+            new Claim(ClaimTypes.NameIdentifier, korisnik.Id)
+                },
+                "Test");
+
+            kontroler.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(identitet)
+                }
+            };
+
+            var rezervacija = new Rezervacija
+            {
+                terminID = termin.id,
+                uneseniKod = kod
+            };
+
+            var rezultat = await kontroler.Create(rezervacija);
+
+            Assert.IsInstanceOfType<RedirectToActionResult>(rezultat);
+
+            var sacuvana = await context.Rezervacije.SingleAsync();
+
+            Assert.IsTrue(sacuvana.primjenjenPopust);
+            Assert.IsTrue(sacuvana.konacnaCijena < termin.cijena);
+
+            var notifikacija = await context.Notifikacije.SingleAsync();
+
+            Assert.IsTrue(notifikacija.poslana);
+
+            handler.Protected().Verify(
+                "SendAsync",
+                Times.Once(),
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>());
+        }
+
+
     }
 }
