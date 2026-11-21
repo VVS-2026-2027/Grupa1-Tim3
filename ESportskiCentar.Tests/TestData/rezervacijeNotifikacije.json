@@ -1,0 +1,50 @@
+[
+  {
+    "tip": "Rezervacija",
+    "id": 1,
+    "vrijednost": 100,
+    "ocekivano": 100
+  },
+  {
+    "tip": "Rezervacija",
+    "id": 2,
+    "vrijednost": 90,
+    "ocekivano": 90
+  },
+  {
+    "tip": "Rezervacija",
+    "id": 3,
+    "vrijednost": 150,
+    "ocekivano": 150
+  },
+  {
+    "tip": "Rezervacija",
+    "id": 4,
+    "vrijednost": 0,
+    "ocekivano": 0
+  },
+  {
+    "tip": "Notifikacija",
+    "id": 5,
+    "vrijednost": 1,
+    "ocekivano": 1
+  },
+  {
+    "tip": "Notifikacija",
+    "id": 6,
+    "vrijednost": 2,
+    "ocekivano": 2
+  },
+  {
+    "tip": "Notifikacija",
+    "id": 7,
+    "vrijednost": 3,
+    "ocekivano": 3
+  },
+  {
+    "tip": "Notifikacija",
+    "id": 8,
+    "vrijednost": 4,
+    "ocekivano": 4
+  }
+]

@@ -84,9 +84,9 @@ namespace ESportskiCentar.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool NotifikacijaExists(int id)
-        {
-            return _context.Notifikacije.Any(e => e.id == id);
-        }
+        //private bool NotifikacijaExists(int id)
+      //{
+       //   return _context.Notifikacije.Any(e => e.id == id);
+      //}
     }
 }

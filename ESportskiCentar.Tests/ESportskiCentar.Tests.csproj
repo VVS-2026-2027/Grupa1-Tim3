@@ -11,6 +11,13 @@
     <None Remove="TestData\popusti.csv" />
     <None Remove="TestData\RegistracijaPodaci.json" />
     <None Remove="TestData\tereni.json" />
+	  <None Update="TestData\rezervacijeNotifikacije.json">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	<None Update="TestData\cijeneRezervacija.csv">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</None>
+	
   </ItemGroup>
 
   <ItemGroup>
