@@ -8,16 +8,8 @@ namespace ESportskiCentar.Helpers
         public static DateTime SadaLokalno()
         {
             TimeZoneInfo zona;
-            try
-            {
-                // za windows
-                zona = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time"); 
-            }
-            catch
-            {
-                // za linux
-                zona = TimeZoneInfo.FindSystemTimeZoneById("Europe/Belgrade");
-            }
+
+            zona = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time"); 
 
             return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, zona);
         }
